@@ -37,18 +37,18 @@
       }
       .container {
         width: 100%;
-        max-width: 650px; /* Un poco más ancho para los resultados */
+        max-width: 650px;
         background-color: var(--color-card);
         padding: 30px;
         border-radius: 12px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); /* Sombra ajustada */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
         text-align: center;
       }
       h1 {
-        font-weight: 700; /* Más peso */
+        font-weight: 700;
         font-size: 2rem; 
         margin-bottom: 25px;
-        color: var(--color-text); /* Título en color de texto principal */
+        color: var(--color-text);
       }
       .input-container {
         display: flex;
@@ -59,14 +59,14 @@
         flex-grow: 1;
         padding: 12px;
         font-size: 1rem;
-        border: 1px solid var(--color-border); /* Borde más fino */
+        border: 1px solid var(--color-border);
         border-radius: 8px;
         transition: border-color 0.3s, box-shadow 0.3s;
         outline: none;
       }
       #searchInput:focus {
         border-color: var(--color-accent);
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra de enfoque azul suave */
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
       }
       button {
         padding: 12px 20px;
@@ -77,7 +77,7 @@
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); /* Sombra para resaltar */
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
         transition: all 0.2s;
       }
       button:hover {
@@ -90,7 +90,7 @@
         margin-bottom: 25px;
         font-size: 0.9rem;
         color: var(--color-secondary);
-        border: 1px solid var(--color-border); /* Borde sutil */
+        border: 1px solid var(--color-border);
         padding: 15px;
         border-radius: 8px;
         background-color: var(--color-card);
@@ -105,46 +105,47 @@
         cursor: pointer;
       }
       
-      /* ESTILOS CLAVE PARA LA NUEVA PRESENTACIÓN DE RESULTADOS */
+      /* ESTILOS CLAVE PARA LA PRESENTACIÓN DE RESULTADOS */
       #resultsContainer {
         text-align: left;
         padding: 15px;
         border: 1px solid var(--color-border);
         border-radius: 8px;
-        background-color: #f7f7f7; /* Fondo ligeramente más oscuro para el área */
+        background-color: #f7f7f7;
         max-height: 400px;
-        overflow-y: auto; /* Scroll si hay muchos resultados */
+        overflow-y: auto;
       }
       
       .result-group {
         display: flex;
         justify-content: flex-start;
-        align-items: flex-start;
+        align-items: center; /* FIX: Alineación vertical perfecta */
+        
         padding: 8px 10px;
         margin-bottom: 6px;
         border-radius: 6px;
         background-color: var(--color-card);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         transition: background-color 0.2s;
+        line-height: 1.5; /* Altura de línea uniforme */
       }
       .result-group:hover {
-        background-color: #f0f8ff; /* Azul muy claro al pasar el ratón */
+        background-color: #f0f8ff;
       }
       
       .reference {
         font-weight: 700;
         color: var(--color-accent);
         margin-right: 10px;
-        white-space: nowrap; /* Evita que el Libro/Capítulo salte de línea */
-        vertical-align: top;
+        white-space: nowrap;
+        /* Line-height y vertical-align son manejados por el contenedor Flex */
       }
       
       .versicles {
         font-weight: 400;
         color: var(--color-text);
-        line-height: 1.5;
-        word-break: break-word; /* Permite que los versículos largos se ajusten */
-        vertical-align: top;
+        word-break: break-word;
+        /* Line-height y vertical-align son manejados por el contenedor Flex */
       }
       
       #statusMessage {
@@ -322,4 +323,3 @@
     </script> 
   </body>
 </html>
-
