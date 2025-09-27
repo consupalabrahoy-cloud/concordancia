@@ -4,17 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Concordancia de palabras griegas en el Nuevo Testamento</title>
-    <!-- Usando Inter font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
       :root {
-        --color-bg: #f5f7fa;
+        /* Fondo y Contenedor */
+        --color-bg: #fafafa;
         --color-card: #ffffff;
-        --color-text: #2c3e50;
-        --color-accent: #3498db;
-        --color-hover: #2980b9;
-        --color-shadow: rgba(0, 0, 0, 0.1);
-        --color-gray: #7f8c8d;
+        
+        /* Tipografía */
+        --color-text: #212529; /* Casi negro */
+        --color-secondary: #6c757d; /* Gris para info secundaria */
+        
+        /* Interacción */
+        --color-accent: #007bff; /* Azul primario */
+        --color-hover: #0056b3;
+        
+        /* Elementos */
+        --color-shadow: rgba(0, 0, 0, 0.05); /* Sombra sutil */
+        --color-border: #e9ecef; /* Borde muy sutil */
       }
       body {
         font-family: 'Inter', sans-serif;
@@ -30,18 +37,18 @@
       }
       .container {
         width: 100%;
-        max-width: 600px;
+        max-width: 650px; /* Un poco más ancho para los resultados */
         background-color: var(--color-card);
         padding: 30px;
         border-radius: 12px;
-        box-shadow: 0 8px 16px var(--color-shadow);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); /* Sombra ajustada */
         text-align: center;
       }
       h1 {
-        font-weight: 600;
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-        color: var(--color-accent);
+        font-weight: 700; /* Más peso */
+        font-size: 2rem; 
+        margin-bottom: 25px;
+        color: var(--color-text); /* Título en color de texto principal */
       }
       .input-container {
         display: flex;
@@ -52,13 +59,14 @@
         flex-grow: 1;
         padding: 12px;
         font-size: 1rem;
-        border: 2px solid #ddd;
+        border: 1px solid var(--color-border); /* Borde más fino */
         border-radius: 8px;
-        transition: border-color 0.3s;
+        transition: border-color 0.3s, box-shadow 0.3s;
         outline: none;
       }
       #searchInput:focus {
         border-color: var(--color-accent);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra de enfoque azul suave */
       }
       button {
         padding: 12px 20px;
@@ -69,48 +77,83 @@
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        transition: background-color 0.3s, transform 0.1s;
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); /* Sombra para resaltar */
+        transition: all 0.2s;
       }
       button:hover {
         background-color: var(--color-hover);
-        transform: translateY(-2px);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 10px rgba(0, 123, 255, 0.3);
       }
       .mode-selector {
         text-align: left;
         margin-bottom: 25px;
-        font-size: 0.95rem;
-        color: var(--color-gray);
-        border: 1px solid #eee;
-        padding: 10px;
+        font-size: 0.9rem;
+        color: var(--color-secondary);
+        border: 1px solid var(--color-border); /* Borde sutil */
+        padding: 15px;
         border-radius: 8px;
-        background-color: #fcfcfc;
+        background-color: var(--color-card);
+        line-height: 1.5;
+      }
+      .mode-selector strong {
+          color: var(--color-text);
+          margin-right: 10px;
       }
       .mode-selector label {
         margin-right: 20px;
         cursor: pointer;
       }
+      
+      /* ESTILOS CLAVE PARA LA NUEVA PRESENTACIÓN DE RESULTADOS */
       #resultsContainer {
         text-align: left;
-        padding-top: 15px;
-      }
-      .result-item {
-        background-color: #ecf0f1;
-        padding: 10px;
+        padding: 15px;
+        border: 1px solid var(--color-border);
         border-radius: 8px;
-        margin-bottom: 8px;
-        transition: transform 0.2s;
+        background-color: #f7f7f7; /* Fondo ligeramente más oscuro para el área */
+        max-height: 400px;
+        overflow-y: auto; /* Scroll si hay muchos resultados */
       }
-      .result-item:hover {
-        transform: translateX(5px);
+      
+      .result-group {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        border-radius: 6px;
+        background-color: var(--color-card);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: background-color 0.2s;
       }
-      .result-item span {
-        font-weight: 600;
+      .result-group:hover {
+        background-color: #f0f8ff; /* Azul muy claro al pasar el ratón */
       }
+      
+      .reference {
+        font-weight: 700;
+        color: var(--color-accent);
+        margin-right: 10px;
+        white-space: nowrap; /* Evita que el Libro/Capítulo salte de línea */
+      }
+      
+      .versicles {
+        font-weight: 400;
+        color: var(--color-text);
+        line-height: 1.5;
+        word-break: break-word; /* Permite que los versículos largos se ajusten */
+      }
+      
       #statusMessage {
-        color: var(--color-gray);
-        font-style: italic;
+        color: var(--color-secondary);
+        font-style: normal;
+        font-size: 0.9rem;
         margin-top: 10px;
+        padding-bottom: 10px;
+        min-height: 20px;
       }
+      
       /* Responsividad */
       @media (max-width: 600px) {
         .container {
@@ -132,130 +175,148 @@
           display: block;
           margin: 8px 0;
         }
+        .result-group {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .reference {
+          margin-bottom: 5px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Concordancia de palabras griegas en el Nuevo Testamento.</h1>
-      
+      <h1>Concordancia de palabras griegas en el Nuevo Testamento</h1>
+       
       <div class="input-container">
         <input type="text" id="searchInput" placeholder="Ingresa una palabra en griego..." />
         <button id="searchButton">Buscar</button>
       </div>
 
-      <!-- Selector de Modo de Búsqueda -->
       <div class="mode-selector">
-        <strong style="color: var(--color-text);">Modo de Búsqueda:</strong>
+        <strong>Modo de Búsqueda:</strong>
         <label>
           <input type="radio" name="searchMode" value="loose">
-          Búsqueda Flexible (Útil para buscar secuencias de letra.)
+          Búsqueda Flexible (secuencias de letra)
         </label>
         <label>
           <input type="radio" name="searchMode" value="strict" checked>
-          Búsqueda Estricta (Para palabras completa y con una máxima precisión en Signos Diacríticos.)
+          Búsqueda Estricta (palabra completa, precisión diacrítica)
         </label>
       </div>
 
       <div id="statusMessage"></div>
-      <!--<div id="resultsContainer"></div>  se anula este div-->
-     <!-- se coloca un textarea para mostrar texto sin formato-->
-      <textarea id="resultsContainer" rows="10" placeholder="Los resultados de la búsqueda aparecerán aquí en formato fácil de copiar..." readonly></textarea>
+      
+      <div id="resultsContainer">
+        <p style="text-align: center; color: var(--color-secondary);">
+          Los resultados se agruparán aquí por Libro y Capítulo.
+        </p>
+      </div>
     </div>
 
-   <script>
+    <script>
+      // TODO: REEMPLAZA ESTA URL CON LA URL DE TU APLICACIÓN DE APPS SCRIPT
+      // Asegúrate de que termine en /exec
+      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwzhlJ1gZv9Z7uu1dO4D-sXcGSJVi8VVzFb6QX0u-ABzxD-v8wIZCxBCqDZ2b454Kh/exec';
 
-    // TODO: REEMPLAZA ESTA URL CON LA URL DE TU APLICACIÓN DE APPS SCRIPT
-    // Asegúrate de que termine en /exec
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwzhlJ1gZv9Z7uu1dO4D-sXcGSJVi8VVzFb6QX0u-ABzxD-v8wIZCxBCqDZ2b454Kh/exec';
-
-    // Función principal de búsqueda
-    function search() {
+      // Función principal de búsqueda
+      function search() {
         var word = document.getElementById('searchInput').value;
         var statusMessage = document.getElementById('statusMessage');
+        var resultsContainer = document.getElementById('resultsContainer');
         
-        // Obtener el modo de búsqueda seleccionado
         var mode = document.querySelector('input[name="searchMode"]:checked').value;
 
         if (!word) {
-            statusMessage.textContent = 'Por favor, ingresa una palabra para buscar.';
-            document.getElementById('resultsContainer').value = ''; // Usar .value
-            return;
+          statusMessage.textContent = 'Por favor, ingresa una palabra para buscar.';
+          resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">Ingresa un término y presiona Buscar.</p>';
+          return;
         }
         
         statusMessage.textContent = 'Buscando...';
+        resultsContainer.innerHTML = ''; // Limpiar resultados anteriores
 
-        // Elimina el script antiguo si existe (para evitar múltiples llamadas)
+        // Elimina el script antiguo si existe
         var oldScript = document.getElementById('jsonpScript');
         if (oldScript) {
-            oldScript.remove();
+          oldScript.remove();
         }
 
         // Crea un nuevo script para la llamada JSONP
         var script = document.createElement('script');
         script.id = 'jsonpScript';
         
-        // CONSTRUCCIÓN DE LA URL: word, mode y callback son parámetros esenciales
+        // CONSTRUCCIÓN DE LA URL
         script.src = `${APPS_SCRIPT_URL}?word=${encodeURIComponent(word)}&mode=${mode}&callback=handleResponse`;
         document.body.appendChild(script);
-    }
+      }
 
-    // Event Listeners
-    document.getElementById('searchButton').addEventListener('click', search);
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      // Event Listeners
+      document.getElementById('searchButton').addEventListener('click', search);
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            search();
+          search();
         }
-    });
+      });
 
-    /**
-     * Procesa la respuesta JSONP de App Script, agrupando los versículos
-     * por el mismo encabezado (Libro Capítulo).
-     */
-    function handleResponse(results) {
+      /**
+       * Procesa la respuesta JSONP y renderiza los resultados en elementos div.
+       */
+      function handleResponse(results) {
         var statusMessage = document.getElementById('statusMessage');
         var resultsContainer = document.getElementById('resultsContainer');
         
-        // Limpiar el textarea y el mensaje de estado
         statusMessage.textContent = '';
-        resultsContainer.value = ''; // Usar .value para el textarea
+        resultsContainer.innerHTML = ''; 
 
         if (results.length > 0) {
-            statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
+          statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
+          
+          // 1. Agrupar los versículos por encabezado (Libro Capítulo)
+          let groupedResults = {};
+          results.forEach(function(item) {
+            const key = item.encabezado; // La clave es 'Libro Capítulo'
+            const versicle = item.versiculo; // El valor es el número de versículo
+
+            if (groupedResults[key]) {
+              groupedResults[key].push(versicle);
+            } else {
+              groupedResults[key] = [versicle];
+            }
+          });
+
+          // 2. Construir los elementos HTML dinámicamente
+          Object.keys(groupedResults).forEach(function(encabezado) {
+            const versiclesList = groupedResults[encabezado].join(', ');
             
-            // Objeto para agrupar versículos por encabezado (Libro Capítulo)
-            let groupedResults = {};
+            // Crea el div para el grupo
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'result-group';
+            
+            // Crea el span para la referencia (Libro Capítulo:)
+            const referenceSpan = document.createElement('span');
+            referenceSpan.className = 'reference';
+            referenceSpan.textContent = encabezado + ':';
+            
+            // Crea el span para la lista de versículos
+            const versiclesSpan = document.createElement('span');
+            versiclesSpan.className = 'versicles';
+            versiclesSpan.textContent = versiclesList;
 
-            // 1. Agrupar los versículos
-            results.forEach(function(item) {
-                const key = item.encabezado; // El encabezado es 'Libro Capítulo'
-                const versicle = item.versiculo; // El versículo es solo el número
-
-                if (groupedResults[key]) {
-                    // Si ya existe, añadir el nuevo versículo al array
-                    groupedResults[key].push(versicle);
-                } else {
-                    // Si no existe, crear un nuevo array con el primer versículo
-                    groupedResults[key] = [versicle];
-                }
-            });
-
-            // 2. Construir el contenido final en formato plano
-            let outputContent = Object.keys(groupedResults).map(function(encabezado) {
-                // Unir los versículos separados por una coma y un espacio
-                const versiclesList = groupedResults[encabezado].join(', ');
-                
-                // Formato final: "Libro Capítulo: Versículo1, Versículo2, Versículo3"
-                return `${encabezado}: ${versiclesList}`;
-            }).join('\n'); // Unir cada línea de referencia con un salto de línea
-
-            resultsContainer.value = outputContent;
+            // Agrega los spans al div del grupo
+            groupDiv.appendChild(referenceSpan);
+            groupDiv.appendChild(versiclesSpan);
+            
+            // Agrega el div del grupo al contenedor principal
+            resultsContainer.appendChild(groupDiv);
+          });
         } else {
-            statusMessage.textContent = 'No se encontraron coincidencias.';
+          statusMessage.textContent = 'No se encontraron coincidencias.';
+          resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontró ninguna referencia para el término buscado.</p>';
         }
-    }
+      }
 
-</script>
-    
+    </script> 
   </body>
 </html>
