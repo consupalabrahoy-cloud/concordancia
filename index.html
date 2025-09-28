@@ -186,7 +186,36 @@
           margin-bottom: 5px;
         }
       }
+
+      /*nueva sección*/
+      /* Nuevo estilo para el recuadro de información gramatical */
+#dictionaryContainer {
+  margin-bottom: 25px;
+  padding: 15px;
+  border-left: 5px solid var(--color-accent); /* Barra lateral para resaltar */
+  background-color: #f0f7ff; /* Fondo muy claro para distinguirlo */
+  border-radius: 8px;
+  text-align: left;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+}
+.dictionary-title {
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 5px;
+}
+.dictionary-info {
+  line-height: 1.5;
+  color: var(--color-text);
+  white-space: pre-wrap; /* Mantiene saltos de línea y formato si los usas */
+}
+.dictionary-placeholder {
+  color: var(--color-secondary);
+  font-style: italic;
+}
     </style>
+
+    
   </head>
   <body>
     <div class="container">
@@ -208,6 +237,8 @@
           Búsqueda Estricta (palabra completa, precisión diacrítica)
         </label>
       </div>
+
+      <div id="dictionaryContainer" style="display: none;"></div>
 
       <div id="statusMessage"></div>
       
@@ -263,63 +294,90 @@
         }
       });
 
-      /**
-       * Procesa la respuesta JSONP y renderiza los resultados en elementos div.
-       */
-      function handleResponse(results) {
-        var statusMessage = document.getElementById('statusMessage');
-        var resultsContainer = document.getElementById('resultsContainer');
-        
-        statusMessage.textContent = '';
-        resultsContainer.innerHTML = ''; 
+ /**
+ * Procesa la respuesta JSONP de App Script.
+ * La respuesta ahora es un objeto: { dictionaryInfo: string|null, concordance: array }
+ */
+function handleResponse(response) {
+    var statusMessage = document.getElementById('statusMessage');
+    var resultsContainer = document.getElementById('resultsContainer');
+    var dictionaryContainer = document.getElementById('dictionaryContainer');
 
-        if (results.length > 0) {
-          statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
-          
-          // 1. Agrupar los versículos por encabezado (Libro Capítulo)
-          let groupedResults = {};
-          results.forEach(function(item) {
-            const key = item.encabezado; // La clave es 'Libro Capítulo'
-            const versicle = item.versiculo; // El valor es el número de versículo
+    // Limpiar contenedores
+    statusMessage.textContent = '';
+    resultsContainer.innerHTML = '';
+    dictionaryContainer.innerHTML = '';
+    dictionaryContainer.style.display = 'none';
+
+    // Obtener las dos partes de la respuesta
+    const dictionaryInfo = response.dictionaryInfo;
+    const results = response.concordance;
+    
+    // ===================================================
+    // 1. Mostrar la Información Gramatical
+    // ===================================================
+    if (dictionaryInfo) {
+        dictionaryContainer.style.display = 'block';
+        dictionaryContainer.innerHTML = `
+            <div class="dictionary-title">Información Gramatical:</div>
+            <div class="dictionary-info">${dictionaryInfo}</div>
+        `;
+    } else {
+        // Mostrar mensaje si no hay información (opcional, pero útil)
+        dictionaryContainer.style.display = 'block';
+        dictionaryContainer.innerHTML = `
+            <div class="dictionary-placeholder">En este momento no tenemos información gramatical para esta palabra.</div>
+        `;
+    }
+
+    // ===================================================
+    // 2. Mostrar la Concordancia (Lógica ya existente)
+    // ===================================================
+
+    if (results.length > 0) {
+        statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
+        
+        // 1. Agrupar los versículos por encabezado (Libro Capítulo)
+        let groupedResults = {};
+        results.forEach(function(item) {
+            const key = item.encabezado;
+            const versicle = item.versiculo;
 
             if (groupedResults[key]) {
-              groupedResults[key].push(versicle);
+                groupedResults[key].push(versicle);
             } else {
-              groupedResults[key] = [versicle];
+                groupedResults[key] = [versicle];
             }
-          });
+        });
 
-          // 2. Construir los elementos HTML dinámicamente
-          Object.keys(groupedResults).forEach(function(encabezado) {
+        // 2. Construir los elementos HTML dinámicamente
+        Object.keys(groupedResults).forEach(function(encabezado) {
             const versiclesList = groupedResults[encabezado].join(', ');
             
-            // Crea el div para el grupo
             const groupDiv = document.createElement('div');
             groupDiv.className = 'result-group';
             
-            // Crea el span para la referencia (Libro Capítulo:)
             const referenceSpan = document.createElement('span');
             referenceSpan.className = 'reference';
             referenceSpan.textContent = encabezado + ':';
             
-            // Crea el span para la lista de versículos
             const versiclesSpan = document.createElement('span');
             versiclesSpan.className = 'versicles';
             versiclesSpan.textContent = versiclesList;
 
-            // Agrega los spans al div del grupo
             groupDiv.appendChild(referenceSpan);
             groupDiv.appendChild(versiclesSpan);
             
-            // Agrega el div del grupo al contenedor principal
             resultsContainer.appendChild(groupDiv);
-          });
-        } else {
-          statusMessage.textContent = 'No se encontraron coincidencias.';
-          resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontró ninguna referencia para el término buscado.</p>';
-        }
-      }
+        });
+    } else {
+        statusMessage.textContent = 'No se encontraron coincidencias.';
+        // Mostrar un mensaje claro si no hay resultados de concordancia
+        resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontró ninguna referencia en la concordancia para el término buscado.</p>';
+    }
+}
 
     </script> 
   </body>
 </html>
+
