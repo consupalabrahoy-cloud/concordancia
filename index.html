@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Concordancia de palabras griegas en el Nuevo Testamento</title>
+    <title>Concordancia y Diccionario Griego</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
       :root {
@@ -12,16 +12,16 @@
         --color-card: #ffffff;
         
         /* Tipografía */
-        --color-text: #212529; /* Casi negro */
-        --color-secondary: #6c757d; /* Gris para info secundaria */
+        --color-text: #212529;
+        --color-secondary: #6c757d;
         
         /* Interacción */
-        --color-accent: #007bff; /* Azul primario */
+        --color-accent: #007bff;
         --color-hover: #0056b3;
         
         /* Elementos */
-        --color-shadow: rgba(0, 0, 0, 0.05); /* Sombra sutil */
-        --color-border: #e9ecef; /* Borde muy sutil */
+        --color-shadow: rgba(0, 0, 0, 0.05);
+        --color-border: #e9ecef;
       }
       body {
         font-family: 'Inter', sans-serif;
@@ -50,6 +50,47 @@
         margin-bottom: 25px;
         color: var(--color-text);
       }
+      
+      /* --- ESTILOS DE PESTAÑAS (NUEVOS) --- */
+      .tab-nav {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid var(--color-border);
+      }
+      
+      .tab-button {
+        background: none;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--color-secondary);
+        cursor: pointer;
+        transition: color 0.2s, border-bottom 0.2s;
+        border-bottom: 2px solid transparent;
+        margin: 0 5px;
+      }
+      
+      .tab-button:hover {
+        color: var(--color-text);
+      }
+      
+      .tab-button.active {
+        color: var(--color-accent);
+        border-bottom: 2px solid var(--color-accent);
+      }
+      
+      .tab-content {
+        display: none;
+        text-align: left;
+      }
+      
+      .tab-content.active {
+        display: block;
+      }
+      
+      /* --- ESTILOS DE CONCORDANCIA (EXISTENTES) --- */
       .input-container {
         display: flex;
         gap: 10px;
@@ -104,8 +145,6 @@
         margin-right: 20px;
         cursor: pointer;
       }
-      
-      /* ESTILOS CLAVE PARA LA PRESENTACIÓN DE RESULTADOS */
       #resultsContainer {
         text-align: left;
         padding: 15px;
@@ -115,39 +154,32 @@
         max-height: 400px;
         overflow-y: auto;
       }
-      
       .result-group {
         display: flex;
         justify-content: flex-start;
-        align-items: center; /* FIX: Alineación vertical perfecta */
-        
+        align-items: center;
         padding: 8px 10px;
         margin-bottom: 6px;
         border-radius: 6px;
         background-color: var(--color-card);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         transition: background-color 0.2s;
-        line-height: 1.5; /* Altura de línea uniforme */
+        line-height: 1.5;
       }
       .result-group:hover {
         background-color: #f0f8ff;
       }
-      
       .reference {
         font-weight: 700;
         color: var(--color-accent);
         margin-right: 10px;
         white-space: nowrap;
-        /* Line-height y vertical-align son manejados por el contenedor Flex */
       }
-      
       .versicles {
         font-weight: 400;
         color: var(--color-text);
         word-break: break-word;
-        /* Line-height y vertical-align son manejados por el contenedor Flex */
       }
-      
       #statusMessage {
         color: var(--color-secondary);
         font-style: normal;
@@ -156,7 +188,99 @@
         padding-bottom: 10px;
         min-height: 20px;
       }
+      #dictionaryContainer {
+        margin-bottom: 25px;
+        padding: 15px;
+        border-left: 5px solid var(--color-accent);
+        background-color: #f0f7ff;
+        border-radius: 8px;
+        text-align: left;
+        font-size: 0.95rem;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+      }
+      .dictionary-title {
+        font-weight: 700;
+        color: var(--color-accent);
+        margin-bottom: 5px;
+      }
+      .dictionary-info {
+        line-height: 1.5;
+        color: var(--color-text);
+        white-space: pre-wrap;
+      }
+      .dictionary-placeholder {
+        color: var(--color-secondary);
+        font-style: normal; /* Evitamos cursiva para mantener la regla de no usar itálicas */
+      }
+
+      /* --- NUEVOS ESTILOS PARA EL DESPLEGABLE DEL DICCIONARIO --- */
+
+      #dictionaryControls {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 20px;
+          padding: 10px 0;
+      }
       
+      #alphaSelect {
+          padding: 10px;
+          font-size: 1rem;
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
+          background-color: var(--color-card);
+          cursor: pointer;
+      }
+      
+      #dictionaryList {
+          max-height: 550px;
+          overflow-y: auto;
+          padding: 10px 0;
+          border-top: 1px solid var(--color-border);
+      }
+      
+      .dictionary-item {
+          padding: 10px 15px;
+          margin-bottom: 5px;
+          border-radius: 6px;
+          background-color: var(--color-bg);
+          border-left: 3px solid transparent;
+          transition: background-color 0.2s, border-left 0.2s;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+      
+      .dictionary-item:hover {
+          background-color: #f0f7ff;
+          border-left: 3px solid var(--color-accent);
+          cursor: pointer;
+      }
+      
+      .dictionary-word {
+          font-weight: 700;
+          color: var(--color-text);
+      }
+      
+      .dictionary-status {
+          font-size: 0.85rem;
+          margin-left: 10px;
+          padding: 2px 6px;
+          border-radius: 4px;
+          display: inline-block;
+          color: #ffffff;
+          white-space: nowrap; /* Evita que el estado salte de línea */
+      }
+      
+      .status-pendiente {
+          background-color: #ffc107;
+      }
+      
+      .status-completado {
+          background-color: #28a745;
+      }
+
       /* Responsividad */
       @media (max-width: 600px) {
         .container {
@@ -186,75 +310,197 @@
           margin-bottom: 5px;
         }
       }
-
-      /*nueva sección*/
-      /* Nuevo estilo para el recuadro de información gramatical */
-#dictionaryContainer {
-  margin-bottom: 25px;
-  padding: 15px;
-  border-left: 5px solid var(--color-accent); /* Barra lateral para resaltar */
-  background-color: #f0f7ff; /* Fondo muy claro para distinguirlo */
-  border-radius: 8px;
-  text-align: left;
-  font-size: 0.95rem;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-}
-.dictionary-title {
-  font-weight: 700;
-  color: var(--color-accent);
-  margin-bottom: 5px;
-}
-.dictionary-info {
-  line-height: 1.5;
-  color: var(--color-text);
-  white-space: pre-wrap; /* Mantiene saltos de línea y formato si los usas */
-}
-.dictionary-placeholder {
-  color: var(--color-secondary);
-  font-style: italic;
-}
     </style>
-
-    
   </head>
   <body>
     <div class="container">
-      <h1>Concordancia de palabras griegas en el Nuevo Testamento</h1>
-       
-      <div class="input-container">
-        <input type="text" id="searchInput" placeholder="Ingresa una palabra en griego..." />
-        <button id="searchButton">Buscar</button>
+      <h1>Concordancia y Diccionario Griego</h1>
+      <div class="tab-nav">
+        <button class="tab-button active" data-tab="concordance">Concordancia</button>
+        <button class="tab-button" data-tab="dictionary">Diccionario</button>
       </div>
 
-      <div class="mode-selector">
-        <strong>Modo de Búsqueda:</strong>
-        <label>
-          <input type="radio" name="searchMode" value="loose">
-          Búsqueda Flexible (secuencias de letra)
-        </label>
-        <label>
-          <input type="radio" name="searchMode" value="strict" checked>
-          Búsqueda Estricta (palabra completa, precisión diacrítica)
-        </label>
+      <div id="concordance" class="tab-content active">
+        <div class="input-container">
+          <input type="text" id="searchInput" placeholder="Ingresa una palabra en griego..." />
+          <button id="searchButton">Buscar</button>
+        </div>
+
+        <div class="mode-selector">
+          <strong>Modo de Búsqueda:</strong>
+          <label>
+            <input type="radio" name="searchMode" value="loose">
+            Búsqueda Flexible (secuencias de letra)
+          </label>
+          <label>
+            <input type="radio" name="searchMode" value="strict" checked>
+            Búsqueda Estricta (palabra completa, precisión diacrítica)
+          </label>
+        </div>
+
+        <div id="dictionaryContainer" style="display: none;"></div>
+        <div id="statusMessage"></div>
+        
+        <div id="resultsContainer">
+          <p style="text-align: center; color: var(--color-secondary);">
+            Los resultados se agruparán aquí por Libro y Capítulo.
+          </p>
+        </div>
       </div>
 
-      <div id="dictionaryContainer" style="display: none;"></div>
-
-      <div id="statusMessage"></div>
+      <div id="dictionary" class="tab-content">
+        <div id="dictionaryControls">
+            <span>Mostrar palabras que comienzan con:</span>
+            <select id="alphaSelect"></select>
+        </div>
+        
+        <div id="dictionaryList">
+             <p style="text-align: center; color: var(--color-secondary);">
+                Cargando diccionario...
+            </p>
+        </div>
+      </div>
       
-      <div id="resultsContainer">
-        <p style="text-align: center; color: var(--color-secondary);">
-          Los resultados se agruparán aquí por Libro y Capítulo.
-        </p>
-      </div>
     </div>
 
     <script>
-      // TODO: REEMPLAZA ESTA URL CON LA URL DE TU APLICACIÓN DE APPS SCRIPT
-      // Asegúrate de que termine en /exec
-      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw-BvWPEBZuDuLrFyJ_-A82bidh-vLYs2qarexFjzVGrfd0-UmnC-yu5tyiChVW69jf/exec';
+      // CONFIGURACIÓN GLOBAL
+      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTxfx2PkzZnd301bnV_XVtLzFXwY4ZJupatFGZvwmAI0XQ74Jzy7MppZmCsJX9bTo2/exec';
+      const GREEK_ALPHABET = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'];
 
-      // Función principal de búsqueda
+      // Variable para almacenar el diccionario completo una vez cargado
+      let fullDictionaryData = null; 
+
+      // ===================================================
+      // LÓGICA DE NAVEGACIÓN DE PESTAÑAS
+      // ===================================================
+
+      function setupTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTabId = button.getAttribute('data-tab');
+
+                // Desactivar todos los botones y contenidos
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Activar el botón y el contenido deseado
+                button.classList.add('active');
+                document.getElementById(targetTabId).classList.add('active');
+
+                // Cargar el diccionario si se cambia a la pestaña 'dictionary' por primera vez
+                if (targetTabId === 'dictionary' && fullDictionaryData === null) {
+                    loadDictionaryList();
+                }
+            });
+        });
+      }
+      
+      // ===================================================
+      // LÓGICA DE DICCIONARIO
+      // ===================================================
+      
+      /**
+       * Inicia la carga del listado completo del diccionario desde la API.
+       */
+      function loadDictionaryList() {
+          const dictListContainer = document.getElementById('dictionaryList');
+          dictListContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">Cargando listado de palabras...</p>';
+          
+          // Llama a la API con un parámetro de acción específico
+          const script = document.createElement('script');
+          script.id = 'jsonpDictScript';
+          script.src = `${APPS_SCRIPT_URL}?action=getFullDictionary&callback=handleDictionaryResponse`;
+          document.body.appendChild(script);
+      }
+      
+      /**
+       * Rellena el desplegable con el alfabeto griego.
+       */
+      function fillAlphabetSelect() {
+          const select = document.getElementById('alphaSelect');
+          select.innerHTML = '<option value="">-- Todas --</option>'; // Opción por defecto
+          
+          GREEK_ALPHABET.forEach(letter => {
+              const option = document.createElement('option');
+              option.value = letter;
+              option.textContent = letter;
+              select.appendChild(option);
+          });
+          
+          select.addEventListener('change', filterDictionaryList);
+      }
+      
+      /**
+       * Filtra y renderiza la lista de palabras según la letra seleccionada.
+       */
+      function filterDictionaryList() {
+          if (!fullDictionaryData) return;
+          
+          const select = document.getElementById('alphaSelect');
+          const filterLetter = select.value;
+          const dictListContainer = document.getElementById('dictionaryList');
+          dictListContainer.innerHTML = ''; // Limpiar lista
+          
+          let filteredData;
+          if (filterLetter) {
+              filteredData = fullDictionaryData.filter(item => 
+                  item.palabra.toUpperCase().startsWith(filterLetter)
+              );
+          } else {
+              filteredData = fullDictionaryData;
+          }
+          
+          if (filteredData.length === 0) {
+              dictListContainer.innerHTML = `<p style="text-align: center; color: var(--color-secondary);">No hay palabras registradas que comiencen con ${filterLetter}.</p>`;
+              return;
+          }
+          
+          // Renderizar los items filtrados
+          filteredData.forEach(item => {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'dictionary-item';
+              itemDiv.dataset.word = item.palabra; // Almacenar la palabra para el clic
+              
+              const statusClass = item.estado.toLowerCase().includes('completado') ? 'status-completado' : 'status-pendiente';
+              
+              itemDiv.innerHTML = `
+                  <span class="dictionary-word">${item.palabra}</span>
+                  <span class="dictionary-status ${statusClass}">${item.estado}</span>
+              `;
+              
+              dictListContainer.appendChild(itemDiv);
+          });
+          
+          // Añadir evento de clic para buscar la palabra al hacer clic
+          document.querySelectorAll('.dictionary-item').forEach(item => {
+              item.addEventListener('click', function() {
+                  // Mover a la pestaña de concordancia y buscar la palabra
+                  const word = this.dataset.word;
+                  document.getElementById('searchInput').value = word;
+                  document.querySelector('[data-tab="concordance"]').click(); // Cambia de pestaña
+                  search(); // Ejecuta la búsqueda
+              });
+          });
+      }
+      
+      /**
+       * Callback que recibe la lista completa del diccionario.
+       */
+      function handleDictionaryResponse(data) {
+          fullDictionaryData = data;
+          fillAlphabetSelect();
+          filterDictionaryList();
+      }
+
+
+      // ===================================================
+      // LÓGICA DE CONCORDANCIA (EXISTENTE)
+      // ===================================================
+
       function search() {
         var word = document.getElementById('searchInput').value;
         var statusMessage = document.getElementById('statusMessage');
@@ -269,21 +515,93 @@
         }
         
         statusMessage.textContent = 'Buscando...';
-        resultsContainer.innerHTML = ''; // Limpiar resultados anteriores
+        resultsContainer.innerHTML = '';
 
-        // Elimina el script antiguo si existe
         var oldScript = document.getElementById('jsonpScript');
         if (oldScript) {
           oldScript.remove();
         }
 
-        // Crea un nuevo script para la llamada JSONP
         var script = document.createElement('script');
         script.id = 'jsonpScript';
         
-        // CONSTRUCCIÓN DE LA URL
+        // La llamada de búsqueda normal ya NO necesita el action=...
         script.src = `${APPS_SCRIPT_URL}?word=${encodeURIComponent(word)}&mode=${mode}&callback=handleResponse`;
         document.body.appendChild(script);
+      }
+
+      /**
+       * Procesa la respuesta JSONP de App Script para la CONCORDANCIA.
+       */
+      function handleResponse(response) {
+        var statusMessage = document.getElementById('statusMessage');
+        var resultsContainer = document.getElementById('resultsContainer');
+        var dictionaryContainer = document.getElementById('dictionaryContainer');
+
+        statusMessage.textContent = '';
+        resultsContainer.innerHTML = '';
+        dictionaryContainer.innerHTML = '';
+        dictionaryContainer.style.display = 'none';
+
+        // Obtener las dos partes de la respuesta
+        const dictionaryInfo = response.dictionaryInfo;
+        const results = response.concordance;
+        
+        // 1. Mostrar la Información Gramatical
+        if (dictionaryInfo) {
+            dictionaryContainer.style.display = 'block';
+            // Usamos la palabra buscada para el título
+            const searchedWord = document.getElementById('searchInput').value; 
+            dictionaryContainer.innerHTML = `
+                <div class="dictionary-title">Información Gramatical (${searchedWord}):</div>
+                <div class="dictionary-info">${dictionaryInfo}</div>
+            `;
+        } else {
+            dictionaryContainer.style.display = 'block';
+            dictionaryContainer.innerHTML = `
+                <div class="dictionary-placeholder">En este momento no tenemos información gramatical para esta palabra.</div>
+            `;
+        }
+
+        // 2. Mostrar la Concordancia
+        if (results.length > 0) {
+            statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
+            
+            let groupedResults = {};
+            results.forEach(function(item) {
+                const key = item.encabezado;
+                const versicle = item.versiculo;
+
+                if (groupedResults[key]) {
+                    groupedResults[key].push(versicle);
+                } else {
+                    groupedResults[key] = [versicle];
+                }
+            });
+
+            Object.keys(groupedResults).forEach(function(encabezado) {
+                const versiclesList = groupedResults[encabezado].join(', ');
+                
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'result-group';
+                
+                const referenceSpan = document.createElement('span');
+                referenceSpan.className = 'reference';
+                referenceSpan.textContent = encabezado + ':';
+                
+                const versiclesSpan = document.createElement('span');
+                versiclesSpan.className = 'versicles';
+                versiclesSpan.textContent = versiclesList;
+
+                groupDiv.appendChild(referenceSpan);
+                groupDiv.appendChild(versiclesSpan);
+                
+                resultsContainer.appendChild(groupDiv);
+            });
+        } else {
+            statusMessage.textContent = 'No se encontraron coincidencias.';
+            resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontró ninguna referencia en la concordancia para el término buscado.</p>';
+        }
       }
 
       // Event Listeners
@@ -293,93 +611,12 @@
           search();
         }
       });
-
- /**
- * Procesa la respuesta JSONP de App Script.
- * La respuesta ahora es un objeto: { dictionaryInfo: string|null, concordance: array }
- */
-function handleResponse(response) {
-    var statusMessage = document.getElementById('statusMessage');
-    var resultsContainer = document.getElementById('resultsContainer');
-    var dictionaryContainer = document.getElementById('dictionaryContainer');
-
-    // Limpiar contenedores
-    statusMessage.textContent = '';
-    resultsContainer.innerHTML = '';
-    dictionaryContainer.innerHTML = '';
-    dictionaryContainer.style.display = 'none';
-
-    // Obtener las dos partes de la respuesta
-    const dictionaryInfo = response.dictionaryInfo;
-    const results = response.concordance;
-    
-    // ===================================================
-    // 1. Mostrar la Información Gramatical
-    // ===================================================
-    if (dictionaryInfo) {
-        dictionaryContainer.style.display = 'block';
-        dictionaryContainer.innerHTML = `
-            <div class="dictionary-title">Información Gramatical:</div>
-            <div class="dictionary-info">${dictionaryInfo}</div>
-        `;
-    } else {
-        // Mostrar mensaje si no hay información (opcional, pero útil)
-        dictionaryContainer.style.display = 'block';
-        dictionaryContainer.innerHTML = `
-            <div class="dictionary-placeholder">En este momento no tenemos información gramatical para esta palabra.</div>
-        `;
-    }
-
-    // ===================================================
-    // 2. Mostrar la Concordancia (Lógica ya existente)
-    // ===================================================
-
-    if (results.length > 0) {
-        statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
-        
-        // 1. Agrupar los versículos por encabezado (Libro Capítulo)
-        let groupedResults = {};
-        results.forEach(function(item) {
-            const key = item.encabezado;
-            const versicle = item.versiculo;
-
-            if (groupedResults[key]) {
-                groupedResults[key].push(versicle);
-            } else {
-                groupedResults[key] = [versicle];
-            }
-        });
-
-        // 2. Construir los elementos HTML dinámicamente
-        Object.keys(groupedResults).forEach(function(encabezado) {
-            const versiclesList = groupedResults[encabezado].join(', ');
-            
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'result-group';
-            
-            const referenceSpan = document.createElement('span');
-            referenceSpan.className = 'reference';
-            referenceSpan.textContent = encabezado + ':';
-            
-            const versiclesSpan = document.createElement('span');
-            versiclesSpan.className = 'versicles';
-            versiclesSpan.textContent = versiclesList;
-
-            groupDiv.appendChild(referenceSpan);
-            groupDiv.appendChild(versiclesSpan);
-            
-            resultsContainer.appendChild(groupDiv);
-        });
-    } else {
-        statusMessage.textContent = 'No se encontraron coincidencias.';
-        // Mostrar un mensaje claro si no hay resultados de concordancia
-        resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontró ninguna referencia en la concordancia para el término buscado.</p>';
-    }
-}
+      
+      // Iniciar la lógica de pestañas y rellenar el selector de alfabeto al cargar
+      document.addEventListener('DOMContentLoaded', function() {
+          setupTabs();
+      });
 
     </script> 
   </body>
 </html>
-
-
-
