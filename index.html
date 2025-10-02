@@ -1,456 +1,812 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador de Concordancia Griega</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Concordancia y Diccionario Griego</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Usamos la fuente Inter para un look limpio y moderno */
-        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+      :root {
+        /* Fondo y Contenedor */
+        --color-bg: #fafafa;
+        --color-card: #ffffff;
         
-        /* Estilo para las sugerencias (dropdown) */
-        .suggestions {
-            max-height: 200px;
-            overflow-y: auto;
-            border-top: none;
-            z-index: 10;
-        }
-        .suggestion-item:hover {
-            background-color: #e5e7eb;
-        }
-        /* Ocultar scrollbar en algunos navegadores */
-        .suggestions::-webkit-scrollbar { width: 4px; }
-        .suggestions::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+        /* Tipografía */
+        --color-text: #212529;
+        --color-secondary: #6c757d;
+        
+        /* Interacción */
+        --color-accent: #007bff;
+        --color-hover: #0056b3;
+        
+        /* Elementos */
+        --color-shadow: rgba(0, 0, 0, 0.05);
+        --color-border: #e9ecef;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      .container {
+        width: 100%;
+        max-width: 650px;
+        background-color: var(--color-card);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        text-align: center;
+      }
+      h1 {
+        font-weight: 700;
+        font-size: 2rem; 
+        margin-bottom: 25px;
+        color: var(--color-text);
+      }
+      
+      /* --- ESTILOS DE PESTAÑAS --- */
+      .tab-nav {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid var(--color-border);
+        overflow-x: auto; /* Permite scroll horizontal si hay muchas pestañas */
+        padding-bottom: 5px;
+      }
+      
+      .tab-button {
+        background: none;
+        border: none;
+        padding: 10px 15px; /* Menos padding para dispositivos pequeños */
+        font-size: 1.0rem; 
+        font-weight: 600;
+        color: var(--color-secondary);
+        cursor: pointer;
+        transition: color 0.2s, border-bottom 0.2s;
+        border-bottom: 2px solid transparent;
+        margin: 0 5px;
+        white-space: nowrap; /* Evita que el texto de la pestaña salte de línea */
+      }
+      
+      .tab-button:hover {
+        color: var(--color-text);
+      }
+      
+      .tab-button.active {
+        color: var(--color-accent);
+        border-bottom: 2px solid var(--color-accent);
+      }
+      
+      .tab-content {
+        display: none;
+        text-align: left;
+      }
+      
+      .tab-content.active {
+        display: block;
+      }
+      
+      /* --- ESTILOS DE CONCORDANCIA (EXISTENTES) --- */
+      .input-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      #searchInput {
+        flex-grow: 1;
+        padding: 12px;
+        font-size: 1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        outline: none;
+      }
+      #searchInput:focus {
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+      button {
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        background-color: var(--color-accent);
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        transition: all 0.2s;
+      }
+      button:hover {
+        background-color: var(--color-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 10px rgba(0, 123, 255, 0.3);
+      }
+      .mode-selector {
+        text-align: left;
+        margin-bottom: 25px;
+        font-size: 0.9rem;
+        color: var(--color-secondary);
+        border: 1px solid var(--color-border);
+        padding: 15px;
+        border-radius: 8px;
+        background-color: var(--color-card);
+        line-height: 1.5;
+      }
+      .mode-selector strong {
+          color: var(--color-text);
+          margin-right: 10px;
+      }
+      .mode-selector label {
+        margin-right: 20px;
+        cursor: pointer;
+      }
+      #resultsContainer {
+        text-align: left;
+        padding: 15px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background-color: #f7f7f7;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .result-group {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        border-radius: 6px;
+        background-color: var(--color-card);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: background-color 0.2s;
+        line-height: 1.5;
+      }
+      .result-group:hover {
+        background-color: #f0f8ff;
+      }
+      .reference {
+        font-weight: 700;
+        color: var(--color-accent);
+        margin-right: 10px;
+        white-space: nowrap;
+      }
+      .versicles {
+        font-weight: 400;
+        color: var(--color-text);
+        word-break: break-word;
+      }
+      #statusMessage {
+        color: var(--color-secondary);
+        font-style: normal;
+        font-size: 0.9rem;
+        margin-top: 10px;
+        padding-bottom: 10px;
+        min-height: 20px;
+      }
+      #dictionaryContainer {
+        margin-bottom: 25px;
+        padding: 15px;
+        border-left: 5px solid var(--color-accent);
+        background-color: #f0f7ff;
+        border-radius: 8px;
+        text-align: left;
+        font-size: 0.95rem;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+      }
+      .dictionary-title {
+        font-weight: 700;
+        color: var(--color-accent);
+        margin-bottom: 5px;
+      }
+      .dictionary-info {
+        line-height: 1.5;
+        color: var(--color-text);
+        white-space: pre-wrap;
+      }
+      .dictionary-placeholder {
+        color: var(--color-secondary);
+        font-style: normal; 
+      }
 
-        /* Estilo para las entradas del diccionario */
-        .dict-entry-box {
-            border-left: 4px solid #3b82f6;
-            background-color: #eff6ff;
-        }
+      /* --- ESTILOS DE DICCIONARIO (EXISTENTES) --- */
+      #dictionaryList {
+          max-height: 550px;
+          overflow-y: auto;
+          padding: 10px 0;
+          border-top: 1px solid var(--color-border);
+      }
+      .dictionary-item {
+          padding: 10px 15px;
+          margin-bottom: 5px;
+          border-radius: 6px;
+          background-color: var(--color-bg);
+          border-left: 3px solid transparent;
+          transition: background-color 0.2s, border-left 0.2s;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+      .dictionary-item:hover {
+          background-color: #f0f7ff;
+          border-left: 3px solid var(--color-accent);
+          cursor: pointer;
+      }
+      .dictionary-word {
+          font-weight: 700;
+          color: var(--color-text);
+      }
+      .dictionary-status {
+          font-size: 0.85rem;
+          margin-left: 10px;
+          padding: 2px 6px;
+          border-radius: 4px;
+          display: inline-block;
+          color: #ffffff;
+          white-space: nowrap;
+      }
+      .status-pendiente {
+          background-color: #ffc107;
+      }
+      .status-completado {
+          background-color: #28a745;
+      }
 
-        /* Estilo para el teclado (puede necesitar un ajuste fino) */
-        .keyboard-key {
-            user-select: none;
-            cursor: pointer;
-            @apply p-2 m-0.5 rounded-md bg-white shadow-sm transition hover:bg-gray-100 active:bg-blue-100;
+      /* --- NUEVOS ESTILOS PARA LA PESTAÑA DE BÚSQUEDA SIMPLE (AGREGADOS ARRIBA) --- */
+      #easySearch {
+          padding-top: 20px;
+      }
+      #easySearchInput {
+          width: 100%;
+          padding: 12px;
+          font-size: 1.5rem; 
+          text-align: center;
+          border: 2px solid var(--color-accent);
+          border-radius: 8px;
+          margin-bottom: 25px;
+          outline: none;
+          box-shadow: 0 4px 6px var(--color-shadow);
+      }
+      #virtualKeyboard {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr); 
+          gap: 5px;
+          margin-bottom: 20px;
+          padding: 10px;
+          background-color: var(--color-bg);
+          border-radius: 10px;
+      }
+      .key-button {
+          padding: 12px 0;
+          font-size: 1.1rem;
+          font-weight: 600;
+          background-color: var(--color-card);
+          color: var(--color-text);
+          border: 1px solid var(--color-border);
+          border-radius: 6px;
+          cursor: pointer;
+          user-select: none; 
+          transition: background-color 0.1s, transform 0.1s;
+      }
+      .key-button:active {
+          background-color: var(--color-hover);
+          color: white;
+          transform: translateY(1px);
+      }
+      .function-key {
+          background-color: #dc3545; 
+          color: white;
+          font-size: 0.9rem;
+      }
+      .function-key.clear-key {
+          background-color: #ffc107; 
+      }
+      #easySearchResults {
+          max-height: 250px;
+          overflow-y: auto;
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
+          padding: 10px;
+          background-color: #f7f7f7;
+          margin-top: 15px;
+      }
+      .suggestion-item {
+          padding: 8px 10px;
+          border-bottom: 1px dashed var(--color-border);
+          cursor: pointer;
+          font-weight: 600;
+          transition: background-color 0.15s;
+      }
+      .suggestion-item:hover {
+          background-color: #e9f7ff;
+      }
+      .suggestion-item:last-child {
+          border-bottom: none;
+      }
+
+
+      /* Responsividad */
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
         }
+        h1 {
+          font-size: 1.5rem;
+        }
+        .input-container {
+          flex-direction: column;
+        }
+        button {
+          width: 100%;
+        }
+        .mode-selector {
+          text-align: center;
+        }
+        .mode-selector label {
+          display: block;
+          margin: 8px 0;
+        }
+        .result-group {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .reference {
+          margin-bottom: 5px;
+        }
+      }
+      @media (max-width: 450px) {
+        #virtualKeyboard {
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 4px;
+            padding: 8px;
+        }
+        .key-button {
+            font-size: 1rem;
+            padding: 10px 0;
+        }
+      }
     </style>
-</head>
-<body class="p-4 sm:p-8 min-h-screen">
-    <div id="appContainer" class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Buscador LexiS-G</h1>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Concordancia y Diccionario Griego</h1>
+      <div class="tab-nav">
+        <button class="tab-button active" data-tab="concordance">Concordancia</button>
+        <button class="tab-button" data-tab="dictionary">Diccionario</button>
+        <button class="tab-button" data-tab="easySearch">Teclado</button>
+      </div>
+
+      <div id="concordance" class="tab-content active">
+        <div class="input-container">
+          <input type="text" id="searchInput" placeholder="Ingresa una palabra en griego..." />
+          <button id="searchButton">Buscar</button>
+        </div>
+
+        <div class="mode-selector">
+          <strong>Modo de Búsqueda:</strong>
+          <label>
+            <input type="radio" name="searchMode" value="loose">
+            Búsqueda Flexible (secuencias de letra)
+          </label>
+          <label>
+            <input type="radio" name="searchMode" value="strict" checked>
+            Búsqueda Estricta (palabra completa, precisión diacrítica)
+          </label>
+        </div>
+
+        <div id="dictionaryContainer" style="display: none;"></div>
+        <div id="statusMessage"></div>
         
-        <!-- API URL Config (OCULTO para el usuario final, PRE-CONFIGURADO por el dueño) -->
-        <!-- NOTA IMPORTANTE: LA URL YA HA SIDO CORREGIDA (SE QUITARON LOS CORCHETES []) -->
-        <div id="apiUrlConfig" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg hidden">
-            <label for="apiUrl" class="block text-sm font-medium text-yellow-800 mb-1">URL de tu API de Apps Script</label>
-            <input type="text" id="apiUrl" placeholder="Pega aquí la URL de despliegue de tu App Script..."
-                   class="w-full px-3 py-2 border border-yellow-300 rounded-lg text-sm focus:ring-yellow-500 focus:border-yellow-500 transition"
-                   value="https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec"
-                   onchange="saveApiUrl()">
-            <p class="text-xs text-yellow-700 mt-1">Este valor se guarda en tu navegador. Si lo necesitas cambiar, edita el código fuente.</p>
+        <div id="resultsContainer">
+          <p style="text-align: center; color: var(--color-secondary);">
+            Los resultados se agruparán aquí por Libro y Capítulo.
+          </p>
         </div>
+      </div>
 
-        <!-- Barra de búsqueda y sugerencias -->
-        <div class="relative mb-6">
-            <input type="text" id="queryInput" placeholder="Escribe la palabra griega (mínimo 2 letras)..."
-                   class="w-full p-4 text-lg border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-blue-500 transition shadow-md"
-                   autocomplete="off" disabled>
-            <ul id="suggestionsList" class="suggestions absolute w-full bg-white border border-gray-300 rounded-b-xl shadow-lg mt-1 hidden"></ul>
-            
-            <button id="searchButton" 
-                    class="absolute right-2 top-2.5 bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition active:scale-95 shadow-md" disabled>
-                Buscar
-            </button>
+      <div id="dictionary" class="tab-content">
+        <div id="dictionaryControls">
+            <span>Mostrar palabras que comienzan con:</span>
+            <select id="alphaSelect"></select>
         </div>
-
-        <!-- Indicador de estado y carga -->
-        <div id="statusMessage" class="text-center text-lg text-blue-600 font-semibold mb-6 p-3 rounded-lg bg-blue-50">
-            Inicializando...
+        
+        <div id="dictionaryList">
+             <p style="text-align: center; color: var(--color-secondary);">
+                Cargando diccionario...
+            </p>
         </div>
-
-        <!-- Teclado Griego (Opcional, pero recomendado) -->
-        <h2 class="text-xl font-semibold text-gray-700 mb-3 mt-8">Teclado Griego</h2>
-        <div id="greekKeyboard" class="flex flex-wrap justify-center p-3 bg-gray-50 rounded-lg shadow-inner">
-            <!-- Fila Alpha (con acentos) -->
-            <div class="keyboard-key" data-char="α">α</div>
-            <div class="keyboard-key" data-char="ά">ά</div>
-            <div class="keyboard-key" data-char="ὰ">ὰ</div>
-            <div class="keyboard-key" data-char="ἀ">ἀ</div>
-            <div class="keyboard-key" data-char="ἁ">ἁ</div>
-            <div class="keyboard-key" data-char="ᾶ">ᾶ</div>
-            <div class="keyboard-key" data-char="ᾳ">ᾳ</div>
-            <!-- Fila Epsilon, Eta, Iota -->
-            <div class="keyboard-key" data-char="ε">ε</div>
-            <div class="keyboard-key" data-char="έ">έ</div>
-            <div class="keyboard-key" data-char="ὴ">ὴ</div>
-            <div class="keyboard-key" data-char="η">η</div>
-            <div class="keyboard-key" data-char="ή">ή</div>
-            <div class="keyboard-key" data-char="ι">ι</div>
-            <div class="keyboard-key" data-char="ί">ί</div>
-            <div class="keyboard-key" data-char="ϊ">ϊ</div>
-            <!-- Fila Omicron, Upsilon -->
-            <div class="keyboard-key" data-char="ο">ο</div>
-            <div class="keyboard-key" data-char="ό">ό</div>
-            <div class="keyboard-key" data-char="υ">υ</div>
-            <div class="keyboard-key" data-char="ύ">ύ</div>
-            <div class="keyboard-key" data-char="ϋ">ϋ</div>
-            <!-- Consonantes Comunes -->
-            <div class="keyboard-key" data-char="σ">σ</div>
-            <div class="keyboard-key" data-char="τ">τ</div>
-            <div class="keyboard-key" data-char="ρ">ρ</div>
-            <div class="keyboard-key" data-char="δ">δ</div>
-            <div class="keyboard-key" data-char="λ">λ</div>
-            <div class="keyboard-key" data-char="κ">κ</div>
-            <!-- Otros signos -->
-            <div class="keyboard-key bg-red-100 hover:bg-red-200" data-char="backspace">⌫</div>
-        </div>
-
-        <!-- Sección de Resultados (Diccionario y Concordancia) -->
-        <div id="resultsContainer" class="mt-10">
-            <!-- Resultados se inyectan aquí -->
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Resultados de la Búsqueda</h2>
-        </div>
+      </div>
+      
+      <div id="easySearch" class="tab-content">
+          <input type="text" id="easySearchInput" placeholder="Escribe aquí (sin acentos)" readonly />
+          
+          <div id="virtualKeyboard">
+            </div>
+          
+          <div id="easySearchResults">
+              <p style="text-align: center; color: var(--color-secondary);">
+                Las sugerencias del diccionario aparecerán aquí.
+              </p>
+          </div>
+      </div>
+      
     </div>
 
     <script>
-        // =========================================================================
-        // 1. CONFIGURACIÓN Y ESTADO GLOBAL (Client-Side Caching)
-        // =========================================================================
-        const API_BASE_URL_KEY = 'greek_api_url';
-        
-        // Objeto para almacenar los datos grandes del diccionario y concordancia localmente
-        let appData = {
-            dictionary: {},
-            isLoaded: false
-        };
+      // CONFIGURACIÓN GLOBAL
+      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec';
+      const GREEK_ALPHABET = ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω'];
+      
+      // Teclas de función extra
+      const FUNCTION_KEYS = [
+          { char: 'Borrar', action: 'backspace', class: 'function-key' },
+          { char: 'Limpiar', action: 'clear', class: 'function-key clear-key' },
+          { char: ' ', action: 'space', class: 'function-key' } // Espacio
+      ];
 
-        const elements = {
-            apiUrl: document.getElementById('apiUrl'),
-            apiUrlConfig: document.getElementById('apiUrlConfig'),
-            queryInput: document.getElementById('queryInput'),
-            suggestionsList: document.getElementById('suggestionsList'),
-            searchButton: document.getElementById('searchButton'),
-            statusMessage: document.getElementById('statusMessage'),
-            resultsContainer: document.getElementById('resultsContainer'),
-            greekKeyboard: document.getElementById('greekKeyboard'),
-        };
+      // Variable para almacenar el diccionario completo una vez cargado
+      let fullDictionaryData = null; 
 
-        // =========================================================================
-        // 2. FUNCIONES HELPER (Portadas de Apps Script)
-        // =========================================================================
+      // ===================================================
+      // LÓGICA DE NAVEGACIÓN DE PESTAÑAS
+      // ===================================================
 
-        /**
-         * Strip Diacritics (Helper Function)
-         * Elimina acentos, espíritus, y subíndices iota del texto griego.
-         * @param {string} text Texto griego con diacríticos.
-         * @return {string} Texto griego sin diacríticos (normalizado).
-         */
-        function stripDiacritics(text) {
-            // Usa la normalización NFKD
-            let normalized = text.normalize('NFKD');
-            
-            // Elimina diacríticos combinados y espíritus griegos
-            let stripped = normalized.replace(/[\u0300-\u036F\u1F00-\u1FFF]/g, function(match) {
-                if (match === '\u0345') return ''; 
-                return '';
+      function setupTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTabId = button.getAttribute('data-tab');
+
+                // Desactivar todos los botones y contenidos
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Activar el botón y el contenido deseado
+                button.classList.add('active');
+                document.getElementById(targetTabId).classList.add('active');
+
+                // Cargar el diccionario si se cambia a la pestaña 'dictionary' por primera vez
+                if (targetTabId === 'dictionary' && fullDictionaryData === null) {
+                    loadDictionaryList();
+                }
             });
-            
-            // Limpieza adicional de caracteres especiales
-            stripped = stripped.replace(/[\u0374-\u037E\u0384\u0385\u1FBC\u1FBE\u1FCF\u1FCD\u1FCC\u1FCE\u1FCB]/g, '');
-            
-            return stripped;
-        }
+        });
+      }
+      
+      // ===================================================
+      // LÓGICA DE TECLADO VIRTUAL (NUEVA)
+      // ===================================================
+      
+      function buildVirtualKeyboard() {
+          const keyboardContainer = document.getElementById('virtualKeyboard');
+          
+          // Unir letras y teclas de función. Queremos poner el espacio al final de la última fila de letras.
+          const allKeys = [...GREEK_ALPHABET, ...FUNCTION_KEYS];
 
-        // =========================================================================
-        // 3. LÓGICA DE CARGA Y CACHÉ (La pieza clave para la velocidad)
-        // =========================================================================
+          allKeys.forEach(keyData => {
+              const button = document.createElement('button');
+              button.className = 'key-button';
+              
+              let char, action, className;
+
+              if (typeof keyData === 'string') {
+                  char = keyData;
+                  action = 'char';
+              } else {
+                  // Es una tecla de función
+                  char = keyData.char;
+                  action = keyData.action;
+                  button.classList.add(keyData.class);
+              }
+
+              button.textContent = char;
+              button.dataset.action = action;
+              button.dataset.char = char; // Almacenar el caracter real
+
+              button.addEventListener('click', () => handleKeyPress(button));
+              keyboardContainer.appendChild(button);
+          });
+      }
+      
+      function handleKeyPress(button) {
+          const input = document.getElementById('easySearchInput');
+          const action = button.dataset.action;
+          const char = button.dataset.char;
+          let currentText = input.value;
+          
+          if (action === 'char') {
+              input.value = currentText + char;
+          } else if (action === 'space') {
+              input.value = currentText + ' ';
+          } else if (action === 'backspace') {
+              input.value = currentText.slice(0, -1);
+          } else if (action === 'clear') {
+              input.value = '';
+          }
+          
+          // Después de cada pulsación, disparar la búsqueda de sugerencias
+          suggestWords(input.value);
+      }
+      
+      // ===================================================
+      // LÓGICA DE SUGERENCIAS (Implementación parcial de frontend)
+      // ===================================================
+      
+      let suggestionTimeout;
+      
+      function suggestWords(inputWord) {
+          const resultsContainer = document.getElementById('easySearchResults');
+          const minLength = 2; // Mínimo de caracteres para buscar
+
+          if (inputWord.length < minLength) {
+              resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">Escribe al menos dos letras griegas para ver sugerencias.</p>';
+              return;
+          }
+
+          // Evitar peticiones rápidas (debounce)
+          clearTimeout(suggestionTimeout);
+          suggestionTimeout = setTimeout(() => {
+              resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-accent);">Buscando sugerencias...</p>';
+              
+              // LLAMADA A LA NUEVA API DE APP SCRIPT (PENDIENTE DE CREACIÓN)
+              var oldScript = document.getElementById('jsonpSuggestScript');
+              if (oldScript) {
+                oldScript.remove();
+              }
+              
+              var script = document.createElement('script');
+              script.id = 'jsonpSuggestScript';
+              // Usaremos la acción 'suggest' para la nueva API
+              script.src = `${APPS_SCRIPT_URL}?action=suggest&query=${encodeURIComponent(inputWord)}&callback=handleSuggestionResponse`;
+              document.body.appendChild(script);
+
+          }, 300); // Espera 300ms antes de buscar
+      }
+
+      function handleSuggestionResponse(suggestions) {
+          const resultsContainer = document.getElementById('easySearchResults');
+          resultsContainer.innerHTML = ''; // Limpiar resultados
+
+          if (suggestions.length === 0) {
+              resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontraron sugerencias de palabras que contengan esas letras.</p>';
+              return;
+          }
+          
+          suggestions.forEach(word => {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'suggestion-item';
+              itemDiv.textContent = word;
+              itemDiv.dataset.word = word;
+              
+              itemDiv.addEventListener('click', function() {
+                  // Mover la palabra sugerida al campo de búsqueda de Concordancia y buscar
+                  const selectedWord = this.dataset.word;
+                  document.getElementById('searchInput').value = selectedWord;
+                  
+                  // Cambia de pestaña a Concordancia
+                  document.querySelector('[data-tab="concordance"]').click(); 
+                  
+                  // Ejecuta la búsqueda de concordancia
+                  search(); 
+              });
+              
+              resultsContainer.appendChild(itemDiv);
+          });
+      }
+
+      // ===================================================
+      // LÓGICA DE DICCIONARIO (EXISTENTE)
+      // ===================================================
+      
+      // [MANTENER EL CÓDIGO DE loadDictionaryList, fillAlphabetSelect, filterDictionaryList, handleDictionaryResponse]
+      // (Aquí el código se omite por brevedad, pero en tu index.html debe permanecer)
+
+      function loadDictionaryList() {
+          const dictListContainer = document.getElementById('dictionaryList');
+          dictListContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">Cargando listado de palabras...</p>';
+          
+          const script = document.createElement('script');
+          script.id = 'jsonpDictScript';
+          script.src = `${APPS_SCRIPT_URL}?action=getFullDictionary&callback=handleDictionaryResponse`;
+          document.body.appendChild(script);
+      }
+      
+      function fillAlphabetSelect() {
+          const select = document.getElementById('alphaSelect');
+          select.innerHTML = '<option value="">-- Todas --</option>';
+          ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'].forEach(letter => {
+              const option = document.createElement('option');
+              option.value = letter;
+              option.textContent = letter;
+              select.appendChild(option);
+          });
+          select.addEventListener('change', filterDictionaryList);
+      }
+      
+      function filterDictionaryList() {
+          if (!fullDictionaryData) return;
+          
+          const select = document.getElementById('alphaSelect');
+          const filterLetter = select.value;
+          const dictListContainer = document.getElementById('dictionaryList');
+          dictListContainer.innerHTML = ''; 
+          
+          let filteredData;
+          if (filterLetter) {
+              filteredData = fullDictionaryData.filter(item => 
+                  item.palabra.toUpperCase().startsWith(filterLetter)
+              );
+          } else {
+              filteredData = fullDictionaryData;
+          }
+          
+          if (filteredData.length === 0) {
+              dictListContainer.innerHTML = `<p style="text-align: center; color: var(--color-secondary);">No hay palabras registradas que comiencen con ${filterLetter}.</p>`;
+              return;
+          }
+          
+          filteredData.forEach(item => {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'dictionary-item';
+              itemDiv.dataset.word = item.palabra; 
+              
+              const statusClass = item.estado.toLowerCase().includes('completado') ? 'status-completado' : 'status-pendiente';
+              
+              itemDiv.innerHTML = `
+                  <span class="dictionary-word">${item.palabra}</span>
+                  <span class="dictionary-status ${statusClass}">${item.estado}</span>
+              `;
+              
+              dictListContainer.appendChild(itemDiv);
+          });
+          
+          document.querySelectorAll('.dictionary-item').forEach(item => {
+              item.addEventListener('click', function() {
+                  const word = this.dataset.word;
+                  document.getElementById('searchInput').value = word;
+                  document.querySelector('[data-tab="concordance"]').click(); 
+                  search(); 
+              });
+          });
+      }
+      
+      function handleDictionaryResponse(data) {
+          fullDictionaryData = data;
+          fillAlphabetSelect();
+          filterDictionaryList();
+      }
+      
+
+      // ===================================================
+      // LÓGICA DE CONCORDANCIA (EXISTENTE)
+      // ===================================================
+
+      // [MANTENER EL CÓDIGO DE search y handleResponse]
+      // (Aquí el código se omite por brevedad, pero en tu index.html debe permanecer)
+      
+      function search() {
+        var word = document.getElementById('searchInput').value;
+        var statusMessage = document.getElementById('statusMessage');
+        var resultsContainer = document.getElementById('resultsContainer');
         
-        /** Guarda la URL de la API en el almacenamiento local */
-        function saveApiUrl() {
-            localStorage.setItem(API_BASE_URL_KEY, elements.apiUrl.value.trim());
+        var mode = document.querySelector('input[name="searchMode"]:checked').value;
+
+        if (!word) {
+          statusMessage.textContent = 'Por favor, ingresa una palabra para buscar.';
+          resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">Ingresa un término y presiona Buscar.</p>';
+          return;
+        }
+        
+        statusMessage.textContent = 'Buscando...';
+        resultsContainer.innerHTML = '';
+
+        var oldScript = document.getElementById('jsonpScript');
+        if (oldScript) {
+          oldScript.remove();
         }
 
-        /** Llama a la API de Apps Script para obtener la lista de palabras del diccionario. */
-        async function fetchInitialData(url) {
-            
-            elements.statusMessage.textContent = "Cargando la lista de palabras del diccionario (puede tardar unos segundos la primera vez)...";
+        var script = document.createElement('script');
+        script.id = 'jsonpScript';
+        
+        script.src = `${APPS_SCRIPT_URL}?word=${encodeURIComponent(word)}&mode=${mode}&callback=handleResponse`;
+        document.body.appendChild(script);
+      }
 
-            // 1. Obtener el diccionario (lista de palabras)
-            // Asumimos que la acción 'getFullDictionary' devuelve un array [{palabra: "...", estado: "..."}]
-            const listUrl = `${url}?action=getFullDictionary&callback=callback`;
-            const wordListPromise = fetch(listUrl)
-                .then(response => response.text())
-                .then(text => {
-                    // console.log("Raw API Response Text:", text.substring(0, 200) + "..."); 
-                    const jsonMatch = text.match(/callback\(([\s\S]*)\)/);
-                    if (!jsonMatch) {
-                        // console.error("JSONP match failed. Received text:", text);
-                        throw new Error("Respuesta inválida de Apps Script (JSONP no reconocido).");
-                    }
-                    return jsonMatch ? JSON.parse(jsonMatch[1]) : [];
-                })
-                .then(list => {
-                    const dictionaryMap = {};
-                    list.forEach(item => {
-                        dictionaryMap[item.palabra] = item.estado;
-                    });
-                    return dictionaryMap;
-                });
+      function handleResponse(response) {
+        var statusMessage = document.getElementById('statusMessage');
+        var resultsContainer = document.getElementById('resultsContainer');
+        var dictionaryContainer = document.getElementById('dictionaryContainer');
 
-            // 2. Ejecutar la promesa y guardar
-            const dictionaryMap = await wordListPromise;
-            
-            appData.dictionary = dictionaryMap;
-            appData.isLoaded = true;
+        statusMessage.textContent = '';
+        resultsContainer.innerHTML = '';
+        dictionaryContainer.innerHTML = '';
+        dictionaryContainer.style.display = 'none';
 
-            // Guardar la lista de palabras en sessionStorage 
-            sessionStorage.setItem('dictionary_words_list', JSON.stringify(Object.keys(dictionaryMap)));
-
-            return true; 
+        const dictionaryInfo = response.dictionaryInfo;
+        const results = response.concordance;
+        
+        if (dictionaryInfo) {
+            dictionaryContainer.style.display = 'block';
+            const searchedWord = document.getElementById('searchInput').value; 
+            dictionaryContainer.innerHTML = `
+                <div class="dictionary-title">Información Gramatical (${searchedWord}):</div>
+                <div class="dictionary-info">${dictionaryInfo}</div>
+            `;
+        } else {
+            dictionaryContainer.style.display = 'block';
+            dictionaryContainer.innerHTML = `
+                <div class="dictionary-placeholder">En este momento no tenemos información gramatical para esta palabra.</div>
+            `;
         }
 
-        /**
-         * Inicializa la aplicación, intentando cargar los datos de caché del navegador.
-         */
-        async function loadData() {
-            let storedApiUrl = elements.apiUrl.value.trim();
+        if (results.length > 0) {
+            statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
             
-            // Si después de todo, la URL sigue siendo el placeholder o está vacía, mostramos el campo para configurarla.
-            if (!storedApiUrl || storedApiUrl === '[PEGA_AQUÍ_TU_URL_DE_APPS_SCRIPT]') {
-                // Intenta cargar desde localStorage si el value inicial era el placeholder
-                storedApiUrl = localStorage.getItem(API_BASE_URL_KEY);
-                if (storedApiUrl) {
-                    elements.apiUrl.value = storedApiUrl;
+            let groupedResults = {};
+            results.forEach(function(item) {
+                const key = item.encabezado;
+                const versicle = item.versiculo;
+
+                if (groupedResults[key]) {
+                    groupedResults[key].push(versicle);
                 } else {
-                    elements.apiUrlConfig.classList.remove('hidden');
-                    elements.statusMessage.textContent = "ERROR DE CONFIGURACIÓN: El dueño debe pegar la URL de la API en el campo superior antes de usarla.";
-                    return;
+                    groupedResults[key] = [versicle];
                 }
-            }
-            
-            // 1. Intentar cargar desde la caché del navegador
-            const cachedWordsList = sessionStorage.getItem('dictionary_words_list');
+            });
 
-            if (cachedWordsList) {
-                // Éxito en caché del navegador
-                elements.statusMessage.textContent = "Datos cargados desde la caché del navegador. ¡Sugerencias instantáneas!";
-                const words = JSON.parse(cachedWordsList);
-                words.forEach(word => {
-                    appData.dictionary[word] = true; 
-                });
-                appData.isLoaded = true;
-                elements.queryInput.disabled = false;
-                elements.searchButton.disabled = false;
-                elements.queryInput.focus();
+            Object.keys(groupedResults).forEach(function(encabezado) {
+                const versiclesList = groupedResults[encabezado].join(', ');
                 
-                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600');
-                elements.statusMessage.classList.add('bg-green-100', 'text-green-600');
-                return;
-            }
-
-            // 2. Fallo de caché: Cargar de la API (Lento)
-            elements.queryInput.disabled = true;
-            elements.searchButton.disabled = true;
-
-            try {
-                await fetchInitialData(elements.apiUrl.value.trim());
-                elements.statusMessage.textContent = "Carga inicial completada. ¡Busca ahora!";
-                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600', 'bg-red-100', 'text-red-600');
-                elements.statusMessage.classList.add('bg-green-100', 'text-green-600');
-
-            } catch (error) {
-                console.error("Error al cargar datos iniciales:", error);
-                elements.statusMessage.textContent = "ERROR de carga. Asegúrate de que la URL de la API es correcta y has desplegado el script. Detalles en consola.";
-                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
-                elements.statusMessage.classList.add('bg-red-100', 'text-red-600');
-            } finally {
-                elements.queryInput.disabled = false;
-                elements.searchButton.disabled = false;
-            }
-        }
-
-        // =========================================================================
-        // 4. LÓGICA DE SUGERENCIAS Y BÚSQUEDA LOCAL
-        // =========================================================================
-
-        /** Genera sugerencias usando los datos almacenados localmente. (INSTANTÁNEO) */
-        function getSuggestionsLocal(query) {
-            if (!appData.isLoaded || query.length < 2) {
-                return [];
-            }
-            const normalizedQuery = stripDiacritics(query.toLowerCase().trim());
-            let suggestions = [];
-            const MAX_SUGGESTIONS = 20;
-
-            for (let word in appData.dictionary) {
-                const normalizedWord = stripDiacritics(word).toLowerCase();
-
-                if (normalizedWord.startsWith(normalizedQuery)) {
-                    suggestions.push(word);
-                    if (suggestions.length >= MAX_SUGGESTIONS) {
-                        break; 
-                    }
-                }
-            }
-            suggestions.sort();
-            return suggestions;
-        }
-
-        /** Maneja el cambio en el input y muestra sugerencias. */
-        function handleInput() {
-            const query = elements.queryInput.value;
-            if (query.length < 2) {
-                elements.suggestionsList.innerHTML = '';
-                elements.suggestionsList.classList.add('hidden');
-                return;
-            }
-
-            const suggestions = getSuggestionsLocal(query);
-            
-            elements.suggestionsList.innerHTML = '';
-            
-            if (suggestions.length > 0) {
-                suggestions.forEach(suggestion => {
-                    const li = document.createElement('li');
-                    li.textContent = suggestion;
-                    li.className = 'suggestion-item p-3 cursor-pointer text-gray-700 hover:bg-gray-100 transition';
-                    li.onclick = () => {
-                        elements.queryInput.value = suggestion;
-                        elements.suggestionsList.classList.add('hidden');
-                        searchWord(suggestion);
-                    };
-                    elements.suggestionsList.appendChild(li);
-                });
-                elements.suggestionsList.classList.remove('hidden');
-            } else {
-                elements.suggestionsList.classList.add('hidden');
-            }
-        }
-        
-        /**
-         * Llama a la API de Apps Script para la búsqueda real.
-         */
-        async function searchWord(word) {
-            if (!elements.apiUrl.value) {
-                elements.statusMessage.textContent = "Por favor, introduce la URL de la API.";
-                return;
-            }
-            if (!word) {
-                word = elements.queryInput.value.trim();
-            }
-            if (!word) return;
-
-            // 1. Mostrar estado de búsqueda
-            elements.resultsContainer.innerHTML = `<p class="text-xl text-center text-blue-600">Buscando '${word}' en la API (esto puede tardar unos segundos)...</p>`;
-            
-            const apiUrl = elements.apiUrl.value.trim();
-            const searchUrl = `${apiUrl}?word=${encodeURIComponent(word)}&mode=loose&callback=callback`;
-
-            // 2. Llamar a la API
-            try {
-                const response = await fetch(searchUrl);
-                const text = await response.text();
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'result-group';
                 
-                // Extraer JSON de JSONP: callback([...])
-                const jsonMatch = text.match(/callback\(([\s\S]*)\)/);
-                const data = jsonMatch ? JSON.parse(jsonMatch[1]) : null;
+                const referenceSpan = document.createElement('span');
+                referenceSpan.className = 'reference';
+                referenceSpan.textContent = encabezado + ':';
+                
+                const versiclesSpan = document.createElement('span');
+                versiclesSpan.className = 'versicles';
+                versiclesSpan.textContent = versiclesList;
 
-                // 3. Renderizar Resultados
-                renderResults(word, data);
-            } catch (error) {
-                console.error("Error al buscar palabra:", error);
-                elements.resultsContainer.innerHTML = `<div class="p-4 bg-red-100 text-red-700 rounded-lg">Error de conexión con la API. Verifica la URL y la consola.</div>`;
-            }
-            
-            elements.suggestionsList.classList.add('hidden');
+                groupDiv.appendChild(referenceSpan);
+                groupDiv.appendChild(versiclesSpan);
+                
+                resultsContainer.appendChild(groupDiv);
+            });
+        } else {
+            statusMessage.textContent = 'No se encontraron coincidencias.';
+            resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontró ninguna referencia en la concordancia para el término buscado.</p>';
         }
+      }
 
-        /**
-         * Renderiza la información del diccionario y la concordancia.
-         */
-        function renderResults(word, data) {
-            let html = `<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Resultados para: ${word}</h2>`;
-            
-            if (!data || data.error) {
-                elements.resultsContainer.innerHTML = html + `<p class="p-3 bg-red-100 text-red-700 rounded-lg">Error de la API: ${data ? data.error : 'No se pudo obtener la respuesta de la API.'}</p>`;
-                return;
-            }
-
-            // 1. Información del Diccionario
-            if (data.dictionaryInfo) {
-                html += `
-                    <div class="dict-entry-box p-4 mb-8 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold text-blue-700 mb-3">Definición y Estado (Diccionario)</h3>
-                        <div class="text-gray-700">${data.dictionaryInfo}</div>
-                    </div>
-                `;
-            } else {
-                html += `<p class="p-3 mb-6 bg-yellow-100 text-yellow-800 rounded-lg">No se encontró una entrada 'Completada' para esta palabra en el diccionario.</p>`;
-            }
-
-            // 2. Concordancia
-            if (data.concordance && data.concordance.length > 0) {
-                html += `
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">${data.concordance.length} Concordancias Encontradas</h3>
-                    <ul class="space-y-3">
-                `;
-                data.concordance.forEach(verse => {
-                    html += `
-                        <li class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                            <span class="font-mono text-sm text-gray-600">${verse.encabezado}</span>
-                            <p class="mt-1 text-gray-800">${verse.versiculo}</p>
-                        </li>
-                    `;
-                });
-                html += `</ul>`;
-            } else {
-                 html += `<p class="p-3 bg-red-100 text-red-700 rounded-lg">No se encontraron coincidencias en la concordancia para la palabra '${word}'.</p>`;
-            }
-
-            elements.resultsContainer.innerHTML = html;
+      // Event Listeners
+      document.getElementById('searchButton').addEventListener('click', search);
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          search();
         }
+      });
+      
+      // Iniciar la lógica de pestañas y teclado al cargar
+      document.addEventListener('DOMContentLoaded', function() {
+          setupTabs();
+          buildVirtualKeyboard();
+          // Habilitar la búsqueda de sugerencias si el usuario usa un teclado físico en el campo
+          document.getElementById('easySearchInput').addEventListener('input', function() {
+              suggestWords(this.value);
+          });
+      });
 
-
-        // =========================================================================
-        // 5. MANEJO DE EVENTOS
-        // =========================================================================
-        
-        function handleKeyboardClick(event) {
-            const char = event.target.getAttribute('data-char');
-            if (!char) return;
-
-            let currentQuery = elements.queryInput.value;
-
-            if (char === 'backspace') {
-                elements.queryInput.value = currentQuery.slice(0, -1);
-            } else {
-                elements.queryInput.value += char;
-            }
-            handleInput(); // Actualiza sugerencias
-        }
-
-        // Event Listeners
-        window.onload = loadData;
-        elements.queryInput.addEventListener('input', handleInput);
-        elements.searchButton.addEventListener('click', () => searchWord());
-        elements.queryInput.addEventListener('keypress', (e) => {
-             if (e.key === 'Enter') {
-                elements.suggestionsList.classList.add('hidden');
-                searchWord();
-            }
-        });
-        elements.greekKeyboard.addEventListener('click', handleKeyboardClick);
-
-        // Ocultar sugerencias al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            if (!elements.queryInput.contains(e.target) && !elements.suggestionsList.contains(e.target)) {
-                elements.suggestionsList.classList.add('hidden');
-            }
-        });
-
-    </script>
-</body>
+    </script> 
+  </body>
 </html>
+
