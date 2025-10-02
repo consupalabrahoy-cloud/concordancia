@@ -42,12 +42,12 @@
     <div id="appContainer" class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Buscador LexiS-G</h1>
         
-        <!-- API URL Config -->
-        <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <!-- API URL Config (OCULTO para el usuario final, pero pre-llenado por el dueño) -->
+        <div id="apiUrlConfig" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg hidden">
             <label for="apiUrl" class="block text-sm font-medium text-yellow-800 mb-1">URL de tu API de Apps Script</label>
             <input type="text" id="apiUrl" placeholder="Pega aquí la URL de despliegue de tu App Script..."
                    class="w-full px-3 py-2 border border-yellow-300 rounded-lg text-sm focus:ring-yellow-500 focus:border-yellow-500 transition"
-                   value=""
+                   value="[PEGA_AQUÍ_LA_URL_DE_TU_APPS_SCRIPT]"
                    onchange="saveApiUrl()">
             <p class="text-xs text-yellow-700 mt-1">Este valor se guarda en tu navegador. Recuerda volver a desplegar tu script si lo cambias.</p>
         </div>
@@ -182,56 +182,15 @@
         
         /** Guarda la URL de la API en el almacenamiento local */
         function saveApiUrl() {
+            // Esta función ya no es relevante si la URL está hardcodeada, 
+            // pero se mantiene para permitir la edición en caso de que se muestre el campo.
             localStorage.setItem(API_BASE_URL_KEY, elements.apiUrl.value.trim());
         }
 
-        /** Llama a la API de Apps Script para obtener TODOS los datos */
+        /** Llama a la API de Apps Script para obtener TODOS los datos (solo palabras para sugerencias) */
         async function fetchInitialData(url) {
             
-            // Lógica para obtener el diccionario completo
-            const dictUrl = `${url}?action=getFullDictionary&callback=callback`;
-            const dictPromise = fetch(dictUrl)
-                .then(response => response.text())
-                .then(text => {
-                    // Extraer el JSON de la respuesta JSONP: callback([...])
-                    const jsonMatch = text.match(/callback\(([\s\S]*)\)/);
-                    return jsonMatch ? JSON.parse(jsonMatch[1]) : [];
-                })
-                .then(wordList => {
-                    // Convertir el array del backend a un objeto para búsqueda O(1)
-                    const dictionary = {};
-                    wordList.forEach(item => {
-                        // El backend devuelve solo {palabra, estado}. 
-                        // Necesitamos recargar la info real del diccionario aquí, pero 
-                        // para simplificar la primera carga, solo cargamos la lista de palabras.
-                        // **NOTA:** La función full search aún necesitaría el diccionario completo, 
-                        // por lo que el App Script necesita una acción que devuelva el objeto completo.
-
-                        // Ya que el App Script solo devuelve una lista simplificada en 'getFullDictionary',
-                        // vamos a crear una función de API que devuelva TODO el objeto de diccionario.
-                        // Usaremos la URL de búsqueda sin 'word' para cargar todo.
-                        
-                        // Si la acción 'getFullDictionary' solo devuelve la lista, se necesitan dos llamadas 
-                        // o un cambio en el backend.
-                        // Vamos a usar la URL de 'suggest' con un query vacío para obtener el diccionario completo 
-                        // (asumiendo que el backend fue modificado para devolverlo).
-                        return {}; // Dejar este paso pendiente de una acción 'getDictionaryObject'
-                    });
-                    return dictionary;
-                });
-                
-            // Como el diccionario y la concordancia son archivos grandes, 
-            // el App Script necesita una acción que devuelva ambos objetos JSON *completos* en una llamada 
-            // (ej. action=getAllData), o debemos hacer dos llamadas lentas.
-            
-            // Por simplicidad de la interfaz (ya que no puedo modificar tu App Script), 
-            // solo cargaremos la lista de palabras del diccionario para las sugerencias rápidas.
-            // La búsqueda completa usará la API lenta cada vez, o nos arriesgamos a una carga inicial muy larga.
-
-            elements.statusMessage.textContent = "¡IMPORTANTE! Para que la búsqueda local funcione, la API debe devolver el objeto completo del diccionario. Simplificando: la API actual solo se usará para la búsqueda, no para cachear el diccionario.";
-            // Puesto que la API actual (getFullDictionary) devuelve un array simplificado, 
-            // la cache local solo servirá para la lista de palabras, no para la info de concordancia. 
-            // Volvemos a la lógica de cargar solo la lista de palabras para sugerencias.
+            elements.statusMessage.textContent = "Cargando la lista de palabras del diccionario (puede tardar unos segundos la primera vez)...";
 
             // 1. Obtener el diccionario (lista de palabras)
             const listUrl = `${url}?action=getFullDictionary&callback=callback`;
@@ -255,7 +214,7 @@
             appData.dictionary = dictionaryMap;
             appData.isLoaded = true;
 
-            // Guardar la lista de palabras en sessionStorage (no los 50MB de concordancia)
+            // Guardar la lista de palabras en sessionStorage 
             sessionStorage.setItem('dictionary_words_list', JSON.stringify(Object.keys(dictionaryMap)));
 
             return true; 
@@ -265,11 +224,21 @@
          * Inicializa la aplicación, intentando cargar los datos de caché del navegador.
          */
         async function loadData() {
-            const storedApiUrl = localStorage.getItem(API_BASE_URL_KEY);
-            if (storedApiUrl) {
-                elements.apiUrl.value = storedApiUrl;
-            } else {
-                elements.statusMessage.textContent = "Introduce la URL de tu API de Apps Script arriba.";
+            // La URL se carga del HTML (pre-llenada por el dueño) o de localStorage
+            let storedApiUrl = elements.apiUrl.value.trim();
+            
+            // Si el dueño no ha cambiado el placeholder, intenta leer de localStorage por si acaso
+            if (storedApiUrl === '[https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec]') {
+                storedApiUrl = localStorage.getItem(API_BASE_URL_KEY);
+                if (storedApiUrl) {
+                    elements.apiUrl.value = storedApiUrl;
+                }
+            }
+            
+            if (!elements.apiUrl.value || elements.apiUrl.value === '[PEGA_AQUÍ_LA_URL_DE_TU_APPS_SCRIPT]') {
+                // Si el dueño olvidó pegarla, mostramos el campo para que lo haga.
+                document.getElementById('apiUrlConfig').classList.remove('hidden');
+                elements.statusMessage.textContent = "ADVERTENCIA: El dueño de la aplicación debe pegar la URL de la API en el campo superior antes de usar.";
                 return;
             }
             
@@ -278,7 +247,7 @@
 
             if (cachedWordsList) {
                 // Éxito en caché del navegador
-                elements.statusMessage.textContent = "Datos cargados desde la caché del navegador. ¡Búsquedas y sugerencias instantáneas!";
+                elements.statusMessage.textContent = "Datos cargados desde la caché del navegador. ¡Sugerencias instantáneas!";
                 const words = JSON.parse(cachedWordsList);
                 words.forEach(word => {
                     appData.dictionary[word] = true; // Solo necesitamos la clave
@@ -292,18 +261,17 @@
             // 2. Fallo de caché: Cargar de la API (Lento)
             elements.queryInput.disabled = true;
             elements.searchButton.disabled = true;
-            elements.statusMessage.textContent = "Cargando el diccionario completo desde Google Drive (puede tardar unos segundos la primera vez)...";
 
             try {
-                await fetchInitialData(storedApiUrl);
+                await fetchInitialData(elements.apiUrl.value.trim());
                 elements.statusMessage.textContent = "Carga inicial completada. ¡Busca ahora!";
-                elements.statusMessage.classList.remove('bg-blue-50');
+                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600');
                 elements.statusMessage.classList.add('bg-green-100', 'text-green-600');
 
             } catch (error) {
                 console.error("Error al cargar datos iniciales:", error);
                 elements.statusMessage.textContent = "ERROR de carga. Asegúrate de que la URL de la API es correcta y has desplegado el script. Detalles en consola.";
-                elements.statusMessage.classList.remove('bg-blue-50');
+                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600');
                 elements.statusMessage.classList.add('bg-red-100', 'text-red-600');
             } finally {
                 elements.queryInput.disabled = false;
