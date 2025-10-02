@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Concordancia y Diccionario Griego koiné</title>
+    <title>Concordancia y Diccionario Griego</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
       :root {
@@ -51,25 +51,28 @@
         color: var(--color-text);
       }
       
-      /* --- ESTILOS DE PESTAÑAS (NUEVOS) --- */
+      /* --- ESTILOS DE PESTAÑAS --- */
       .tab-nav {
         display: flex;
         justify-content: center;
         margin-bottom: 25px;
         border-bottom: 2px solid var(--color-border);
+        overflow-x: auto; /* Permite scroll horizontal si hay muchas pestañas */
+        padding-bottom: 5px;
       }
       
       .tab-button {
         background: none;
         border: none;
-        padding: 10px 20px;
-        font-size: 1.1rem;
+        padding: 10px 15px; /* Menos padding para dispositivos pequeños */
+        font-size: 1.0rem; 
         font-weight: 600;
         color: var(--color-secondary);
         cursor: pointer;
         transition: color 0.2s, border-bottom 0.2s;
         border-bottom: 2px solid transparent;
         margin: 0 5px;
+        white-space: nowrap; /* Evita que el texto de la pestaña salte de línea */
       }
       
       .tab-button:hover {
@@ -210,36 +213,16 @@
       }
       .dictionary-placeholder {
         color: var(--color-secondary);
-        font-style: normal; /* Evitamos cursiva para mantener la regla de no usar itálicas */
+        font-style: normal; 
       }
 
-      /* --- NUEVOS ESTILOS PARA EL DESPLEGABLE DEL DICCIONARIO --- */
-
-      #dictionaryControls {
-          display: flex;
-          justify-content: flex-start;
-          align-items: center;
-          gap: 15px;
-          margin-bottom: 20px;
-          padding: 10px 0;
-      }
-      
-      #alphaSelect {
-          padding: 10px;
-          font-size: 1rem;
-          border: 1px solid var(--color-border);
-          border-radius: 8px;
-          background-color: var(--color-card);
-          cursor: pointer;
-      }
-      
+      /* --- ESTILOS DE DICCIONARIO (EXISTENTES) --- */
       #dictionaryList {
           max-height: 550px;
           overflow-y: auto;
           padding: 10px 0;
           border-top: 1px solid var(--color-border);
       }
-      
       .dictionary-item {
           padding: 10px 15px;
           margin-bottom: 5px;
@@ -251,18 +234,15 @@
           justify-content: space-between;
           align-items: center;
       }
-      
       .dictionary-item:hover {
           background-color: #f0f7ff;
           border-left: 3px solid var(--color-accent);
           cursor: pointer;
       }
-      
       .dictionary-word {
           font-weight: 700;
           color: var(--color-text);
       }
-      
       .dictionary-status {
           font-size: 0.85rem;
           margin-left: 10px;
@@ -270,16 +250,87 @@
           border-radius: 4px;
           display: inline-block;
           color: #ffffff;
-          white-space: nowrap; /* Evita que el estado salte de línea */
+          white-space: nowrap;
       }
-      
       .status-pendiente {
           background-color: #ffc107;
       }
-      
       .status-completado {
           background-color: #28a745;
       }
+
+      /* --- NUEVOS ESTILOS PARA LA PESTAÑA DE BÚSQUEDA SIMPLE (AGREGADOS ARRIBA) --- */
+      #easySearch {
+          padding-top: 20px;
+      }
+      #easySearchInput {
+          width: 100%;
+          padding: 12px;
+          font-size: 1.5rem; 
+          text-align: center;
+          border: 2px solid var(--color-accent);
+          border-radius: 8px;
+          margin-bottom: 25px;
+          outline: none;
+          box-shadow: 0 4px 6px var(--color-shadow);
+      }
+      #virtualKeyboard {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr); 
+          gap: 5px;
+          margin-bottom: 20px;
+          padding: 10px;
+          background-color: var(--color-bg);
+          border-radius: 10px;
+      }
+      .key-button {
+          padding: 12px 0;
+          font-size: 1.1rem;
+          font-weight: 600;
+          background-color: var(--color-card);
+          color: var(--color-text);
+          border: 1px solid var(--color-border);
+          border-radius: 6px;
+          cursor: pointer;
+          user-select: none; 
+          transition: background-color 0.1s, transform 0.1s;
+      }
+      .key-button:active {
+          background-color: var(--color-hover);
+          color: white;
+          transform: translateY(1px);
+      }
+      .function-key {
+          background-color: #dc3545; 
+          color: white;
+          font-size: 0.9rem;
+      }
+      .function-key.clear-key {
+          background-color: #ffc107; 
+      }
+      #easySearchResults {
+          max-height: 250px;
+          overflow-y: auto;
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
+          padding: 10px;
+          background-color: #f7f7f7;
+          margin-top: 15px;
+      }
+      .suggestion-item {
+          padding: 8px 10px;
+          border-bottom: 1px dashed var(--color-border);
+          cursor: pointer;
+          font-weight: 600;
+          transition: background-color 0.15s;
+      }
+      .suggestion-item:hover {
+          background-color: #e9f7ff;
+      }
+      .suggestion-item:last-child {
+          border-bottom: none;
+      }
+
 
       /* Responsividad */
       @media (max-width: 600px) {
@@ -310,14 +361,26 @@
           margin-bottom: 5px;
         }
       }
+      @media (max-width: 450px) {
+        #virtualKeyboard {
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 4px;
+            padding: 8px;
+        }
+        .key-button {
+            font-size: 1rem;
+            padding: 10px 0;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Concordancia y Diccionario Griego koiné</h1>
+      <h1>Concordancia y Diccionario Griego</h1>
       <div class="tab-nav">
         <button class="tab-button active" data-tab="concordance">Concordancia</button>
         <button class="tab-button" data-tab="dictionary">Diccionario</button>
+        <button class="tab-button" data-tab="easySearch">Búsqueda Simple</button>
       </div>
 
       <div id="concordance" class="tab-content active">
@@ -361,12 +424,32 @@
         </div>
       </div>
       
+      <div id="easySearch" class="tab-content">
+          <input type="text" id="easySearchInput" placeholder="Escribe aquí (sin acentos)" readonly />
+          
+          <div id="virtualKeyboard">
+            </div>
+          
+          <div id="easySearchResults">
+              <p style="text-align: center; color: var(--color-secondary);">
+                Las sugerencias del diccionario aparecerán aquí.
+              </p>
+          </div>
+      </div>
+      
     </div>
 
     <script>
       // CONFIGURACIÓN GLOBAL
-      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFCGwYGFr8qbMlT8BSYJzKGmyfzsBuhC-tNMIJpQgMy52wfNlwemuV6o5Y-akl3XdG/exec';
-      const GREEK_ALPHABET = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'];
+      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTxfx2PkzZnd301bnV_XVtLzFXwY4ZJupatFGZvwmAI0XQ74Jzy7MppZmCsJX9bTo2/exec';
+      const GREEK_ALPHABET = ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω'];
+      
+      // Teclas de función extra
+      const FUNCTION_KEYS = [
+          { char: 'Borrar', action: 'backspace', class: 'function-key' },
+          { char: 'Limpiar', action: 'clear', class: 'function-key clear-key' },
+          { char: ' ', action: 'space', class: 'function-key' } // Espacio
+      ];
 
       // Variable para almacenar el diccionario completo una vez cargado
       let fullDictionaryData = null; 
@@ -400,50 +483,162 @@
       }
       
       // ===================================================
-      // LÓGICA DE DICCIONARIO
+      // LÓGICA DE TECLADO VIRTUAL (NUEVA)
       // ===================================================
       
-      /**
-       * Inicia la carga del listado completo del diccionario desde la API.
-       */
+      function buildVirtualKeyboard() {
+          const keyboardContainer = document.getElementById('virtualKeyboard');
+          
+          // Unir letras y teclas de función. Queremos poner el espacio al final de la última fila de letras.
+          const allKeys = [...GREEK_ALPHABET, ...FUNCTION_KEYS];
+
+          allKeys.forEach(keyData => {
+              const button = document.createElement('button');
+              button.className = 'key-button';
+              
+              let char, action, className;
+
+              if (typeof keyData === 'string') {
+                  char = keyData;
+                  action = 'char';
+              } else {
+                  // Es una tecla de función
+                  char = keyData.char;
+                  action = keyData.action;
+                  button.classList.add(keyData.class);
+              }
+
+              button.textContent = char;
+              button.dataset.action = action;
+              button.dataset.char = char; // Almacenar el caracter real
+
+              button.addEventListener('click', () => handleKeyPress(button));
+              keyboardContainer.appendChild(button);
+          });
+      }
+      
+      function handleKeyPress(button) {
+          const input = document.getElementById('easySearchInput');
+          const action = button.dataset.action;
+          const char = button.dataset.char;
+          let currentText = input.value;
+          
+          if (action === 'char') {
+              input.value = currentText + char;
+          } else if (action === 'space') {
+              input.value = currentText + ' ';
+          } else if (action === 'backspace') {
+              input.value = currentText.slice(0, -1);
+          } else if (action === 'clear') {
+              input.value = '';
+          }
+          
+          // Después de cada pulsación, disparar la búsqueda de sugerencias
+          suggestWords(input.value);
+      }
+      
+      // ===================================================
+      // LÓGICA DE SUGERENCIAS (Implementación parcial de frontend)
+      // ===================================================
+      
+      let suggestionTimeout;
+      
+      function suggestWords(inputWord) {
+          const resultsContainer = document.getElementById('easySearchResults');
+          const minLength = 2; // Mínimo de caracteres para buscar
+
+          if (inputWord.length < minLength) {
+              resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">Escribe al menos dos letras griegas para ver sugerencias.</p>';
+              return;
+          }
+
+          // Evitar peticiones rápidas (debounce)
+          clearTimeout(suggestionTimeout);
+          suggestionTimeout = setTimeout(() => {
+              resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-accent);">Buscando sugerencias...</p>';
+              
+              // LLAMADA A LA NUEVA API DE APP SCRIPT (PENDIENTE DE CREACIÓN)
+              var oldScript = document.getElementById('jsonpSuggestScript');
+              if (oldScript) {
+                oldScript.remove();
+              }
+              
+              var script = document.createElement('script');
+              script.id = 'jsonpSuggestScript';
+              // Usaremos la acción 'suggest' para la nueva API
+              script.src = `${APPS_SCRIPT_URL}?action=suggest&query=${encodeURIComponent(inputWord)}&callback=handleSuggestionResponse`;
+              document.body.appendChild(script);
+
+          }, 300); // Espera 300ms antes de buscar
+      }
+
+      function handleSuggestionResponse(suggestions) {
+          const resultsContainer = document.getElementById('easySearchResults');
+          resultsContainer.innerHTML = ''; // Limpiar resultados
+
+          if (suggestions.length === 0) {
+              resultsContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">No se encontraron sugerencias de palabras que contengan esas letras.</p>';
+              return;
+          }
+          
+          suggestions.forEach(word => {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'suggestion-item';
+              itemDiv.textContent = word;
+              itemDiv.dataset.word = word;
+              
+              itemDiv.addEventListener('click', function() {
+                  // Mover la palabra sugerida al campo de búsqueda de Concordancia y buscar
+                  const selectedWord = this.dataset.word;
+                  document.getElementById('searchInput').value = selectedWord;
+                  
+                  // Cambia de pestaña a Concordancia
+                  document.querySelector('[data-tab="concordance"]').click(); 
+                  
+                  // Ejecuta la búsqueda de concordancia
+                  search(); 
+              });
+              
+              resultsContainer.appendChild(itemDiv);
+          });
+      }
+
+      // ===================================================
+      // LÓGICA DE DICCIONARIO (EXISTENTE)
+      // ===================================================
+      
+      // [MANTENER EL CÓDIGO DE loadDictionaryList, fillAlphabetSelect, filterDictionaryList, handleDictionaryResponse]
+      // (Aquí el código se omite por brevedad, pero en tu index.html debe permanecer)
+
       function loadDictionaryList() {
           const dictListContainer = document.getElementById('dictionaryList');
           dictListContainer.innerHTML = '<p style="text-align: center; color: var(--color-secondary);">Cargando listado de palabras...</p>';
           
-          // Llama a la API con un parámetro de acción específico
           const script = document.createElement('script');
           script.id = 'jsonpDictScript';
           script.src = `${APPS_SCRIPT_URL}?action=getFullDictionary&callback=handleDictionaryResponse`;
           document.body.appendChild(script);
       }
       
-      /**
-       * Rellena el desplegable con el alfabeto griego.
-       */
       function fillAlphabetSelect() {
           const select = document.getElementById('alphaSelect');
-          select.innerHTML = '<option value="">-- Todas --</option>'; // Opción por defecto
-          
-          GREEK_ALPHABET.forEach(letter => {
+          select.innerHTML = '<option value="">-- Todas --</option>';
+          ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'].forEach(letter => {
               const option = document.createElement('option');
               option.value = letter;
               option.textContent = letter;
               select.appendChild(option);
           });
-          
           select.addEventListener('change', filterDictionaryList);
       }
       
-      /**
-       * Filtra y renderiza la lista de palabras según la letra seleccionada.
-       */
       function filterDictionaryList() {
           if (!fullDictionaryData) return;
           
           const select = document.getElementById('alphaSelect');
           const filterLetter = select.value;
           const dictListContainer = document.getElementById('dictionaryList');
-          dictListContainer.innerHTML = ''; // Limpiar lista
+          dictListContainer.innerHTML = ''; 
           
           let filteredData;
           if (filterLetter) {
@@ -459,11 +654,10 @@
               return;
           }
           
-          // Renderizar los items filtrados
           filteredData.forEach(item => {
               const itemDiv = document.createElement('div');
               itemDiv.className = 'dictionary-item';
-              itemDiv.dataset.word = item.palabra; // Almacenar la palabra para el clic
+              itemDiv.dataset.word = item.palabra; 
               
               const statusClass = item.estado.toLowerCase().includes('completado') ? 'status-completado' : 'status-pendiente';
               
@@ -475,32 +669,30 @@
               dictListContainer.appendChild(itemDiv);
           });
           
-          // Añadir evento de clic para buscar la palabra al hacer clic
           document.querySelectorAll('.dictionary-item').forEach(item => {
               item.addEventListener('click', function() {
-                  // Mover a la pestaña de concordancia y buscar la palabra
                   const word = this.dataset.word;
                   document.getElementById('searchInput').value = word;
-                  document.querySelector('[data-tab="concordance"]').click(); // Cambia de pestaña
-                  search(); // Ejecuta la búsqueda
+                  document.querySelector('[data-tab="concordance"]').click(); 
+                  search(); 
               });
           });
       }
       
-      /**
-       * Callback que recibe la lista completa del diccionario.
-       */
       function handleDictionaryResponse(data) {
           fullDictionaryData = data;
           fillAlphabetSelect();
           filterDictionaryList();
       }
-
+      
 
       // ===================================================
       // LÓGICA DE CONCORDANCIA (EXISTENTE)
       // ===================================================
 
+      // [MANTENER EL CÓDIGO DE search y handleResponse]
+      // (Aquí el código se omite por brevedad, pero en tu index.html debe permanecer)
+      
       function search() {
         var word = document.getElementById('searchInput').value;
         var statusMessage = document.getElementById('statusMessage');
@@ -525,14 +717,10 @@
         var script = document.createElement('script');
         script.id = 'jsonpScript';
         
-        // La llamada de búsqueda normal ya NO necesita el action=...
         script.src = `${APPS_SCRIPT_URL}?word=${encodeURIComponent(word)}&mode=${mode}&callback=handleResponse`;
         document.body.appendChild(script);
       }
 
-      /**
-       * Procesa la respuesta JSONP de App Script para la CONCORDANCIA.
-       */
       function handleResponse(response) {
         var statusMessage = document.getElementById('statusMessage');
         var resultsContainer = document.getElementById('resultsContainer');
@@ -543,14 +731,11 @@
         dictionaryContainer.innerHTML = '';
         dictionaryContainer.style.display = 'none';
 
-        // Obtener las dos partes de la respuesta
         const dictionaryInfo = response.dictionaryInfo;
         const results = response.concordance;
         
-        // 1. Mostrar la Información Gramatical
         if (dictionaryInfo) {
             dictionaryContainer.style.display = 'block';
-            // Usamos la palabra buscada para el título
             const searchedWord = document.getElementById('searchInput').value; 
             dictionaryContainer.innerHTML = `
                 <div class="dictionary-title">Información Gramatical (${searchedWord}):</div>
@@ -563,7 +748,6 @@
             `;
         }
 
-        // 2. Mostrar la Concordancia
         if (results.length > 0) {
             statusMessage.textContent = 'Se encontraron ' + results.length + ' coincidencias.';
             
@@ -612,19 +796,16 @@
         }
       });
       
-      // Iniciar la lógica de pestañas y rellenar el selector de alfabeto al cargar
+      // Iniciar la lógica de pestañas y teclado al cargar
       document.addEventListener('DOMContentLoaded', function() {
           setupTabs();
+          buildVirtualKeyboard();
+          // Habilitar la búsqueda de sugerencias si el usuario usa un teclado físico en el campo
+          document.getElementById('easySearchInput').addEventListener('input', function() {
+              suggestWords(this.value);
+          });
       });
 
     </script> 
   </body>
 </html>
-
-
-
-
-
-
-
-
