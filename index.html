@@ -42,32 +42,32 @@
     <div id="appContainer" class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Buscador LexiS-G</h1>
         
-        <!-- API URL Config (OCULTO para el usuario final, pero pre-llenado por el dueño) -->
+        <!-- API URL Config (OCULTO para el usuario final, PRE-CONFIGURADO por el dueño) -->
         <div id="apiUrlConfig" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg hidden">
             <label for="apiUrl" class="block text-sm font-medium text-yellow-800 mb-1">URL de tu API de Apps Script</label>
-            <input type="text" id="apiUrl" placeholder="Pega aquí la URL de despliegue de tu App Script..."
+            <input type="text" id="apiUrl" placeholder="Pega la url aquí..."
                    class="w-full px-3 py-2 border border-yellow-300 rounded-lg text-sm focus:ring-yellow-500 focus:border-yellow-500 transition"
                    value="[https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec]"
                    onchange="saveApiUrl()">
-            <p class="text-xs text-yellow-700 mt-1">Este valor se guarda en tu navegador. Recuerda volver a desplegar tu script si lo cambias.</p>
+            <p class="text-xs text-yellow-700 mt-1">Este valor se guarda en tu navegador. Si lo necesitas cambiar, edita el código fuente.</p>
         </div>
 
         <!-- Barra de búsqueda y sugerencias -->
         <div class="relative mb-6">
             <input type="text" id="queryInput" placeholder="Escribe la palabra griega (mínimo 2 letras)..."
                    class="w-full p-4 text-lg border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-blue-500 transition shadow-md"
-                   autocomplete="off">
+                   autocomplete="off" disabled>
             <ul id="suggestionsList" class="suggestions absolute w-full bg-white border border-gray-300 rounded-b-xl shadow-lg mt-1 hidden"></ul>
             
             <button id="searchButton" 
-                    class="absolute right-2 top-2.5 bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition active:scale-95 shadow-md">
+                    class="absolute right-2 top-2.5 bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition active:scale-95 shadow-md" disabled>
                 Buscar
             </button>
         </div>
 
         <!-- Indicador de estado y carga -->
         <div id="statusMessage" class="text-center text-lg text-blue-600 font-semibold mb-6 p-3 rounded-lg bg-blue-50">
-            Cargando...
+            Inicializando...
         </div>
 
         <!-- Teclado Griego (Opcional, pero recomendado) -->
@@ -123,12 +123,12 @@
         // Objeto para almacenar los datos grandes del diccionario y concordancia localmente
         let appData = {
             dictionary: {},
-            concordance: [],
             isLoaded: false
         };
 
         const elements = {
             apiUrl: document.getElementById('apiUrl'),
+            apiUrlConfig: document.getElementById('apiUrlConfig'),
             queryInput: document.getElementById('queryInput'),
             suggestionsList: document.getElementById('suggestionsList'),
             searchButton: document.getElementById('searchButton'),
@@ -163,36 +163,22 @@
             return stripped;
         }
 
-        /**
-         * Tokenize Text (Helper Function)
-         * Limpia una cadena de texto de puntuación y la divide en un array de palabras.
-         * @param {string} text Texto de un versículo.
-         * @return {string[]} Array de palabras limpias.
-         */
-        function tokenizeText(text) {
-            // Reemplaza la puntuación común con un espacio
-            return text.replace(/[.,;:\u0387\u2022\u2019]/g, ' ') 
-                        .split(/\s+/)
-                        .filter(Boolean); // Elimina elementos vacíos
-        }
-
         // =========================================================================
         // 3. LÓGICA DE CARGA Y CACHÉ (La pieza clave para la velocidad)
         // =========================================================================
         
         /** Guarda la URL de la API en el almacenamiento local */
         function saveApiUrl() {
-            // Esta función ya no es relevante si la URL está hardcodeada, 
-            // pero se mantiene para permitir la edición en caso de que se muestre el campo.
             localStorage.setItem(API_BASE_URL_KEY, elements.apiUrl.value.trim());
         }
 
-        /** Llama a la API de Apps Script para obtener TODOS los datos (solo palabras para sugerencias) */
+        /** Llama a la API de Apps Script para obtener la lista de palabras del diccionario. */
         async function fetchInitialData(url) {
             
             elements.statusMessage.textContent = "Cargando la lista de palabras del diccionario (puede tardar unos segundos la primera vez)...";
 
             // 1. Obtener el diccionario (lista de palabras)
+            // Asumimos que la acción 'getFullDictionary' devuelve un array [{palabra: "...", estado: "..."}]
             const listUrl = `${url}?action=getFullDictionary&callback=callback`;
             const wordListPromise = fetch(listUrl)
                 .then(response => response.text())
@@ -224,21 +210,20 @@
          * Inicializa la aplicación, intentando cargar los datos de caché del navegador.
          */
         async function loadData() {
-            // La URL se carga del HTML (pre-llenada por el dueño) o de localStorage
             let storedApiUrl = elements.apiUrl.value.trim();
             
-            // Si el dueño no ha cambiado el placeholder, intenta leer de localStorage por si acaso
-            if (storedApiUrl === '[PEGA_AQUÍ_LA_URL_DE_TU_APPS_SCRIPT]') {
+            // Si el dueño olvidó rellenar el placeholder, intentamos leer de localStorage (si ya lo había puesto)
+            if (storedApiUrl === '[PEGA_AQUÍ_TU_URL_DE_APPS_SCRIPT]') {
                 storedApiUrl = localStorage.getItem(API_BASE_URL_KEY);
                 if (storedApiUrl) {
                     elements.apiUrl.value = storedApiUrl;
                 }
             }
             
-            if (!elements.apiUrl.value || elements.apiUrl.value === '[PEGA_AQUÍ_LA_URL_DE_TU_APPS_SCRIPT]') {
-                // Si el dueño olvidó pegarla, mostramos el campo para que lo haga.
-                document.getElementById('apiUrlConfig').classList.remove('hidden');
-                elements.statusMessage.textContent = "ADVERTENCIA: El dueño de la aplicación debe pegar la URL de la API en el campo superior antes de usar.";
+            // Si después de todo, la URL sigue siendo el placeholder o está vacía, mostramos el campo para configurarla.
+            if (!elements.apiUrl.value || elements.apiUrl.value === '[PEGA_AQUÍ_TU_URL_DE_APPS_SCRIPT]') {
+                elements.apiUrlConfig.classList.remove('hidden');
+                elements.statusMessage.textContent = "ERROR DE CONFIGURACIÓN: El dueño debe pegar la URL de la API en el campo superior antes de usarla.";
                 return;
             }
             
@@ -250,11 +235,12 @@
                 elements.statusMessage.textContent = "Datos cargados desde la caché del navegador. ¡Sugerencias instantáneas!";
                 const words = JSON.parse(cachedWordsList);
                 words.forEach(word => {
-                    appData.dictionary[word] = true; // Solo necesitamos la clave
+                    appData.dictionary[word] = true; 
                 });
                 appData.isLoaded = true;
                 elements.queryInput.disabled = false;
                 elements.searchButton.disabled = false;
+                elements.queryInput.focus();
                 return;
             }
 
@@ -293,10 +279,8 @@
             const MAX_SUGGESTIONS = 20;
 
             for (let word in appData.dictionary) {
-                // 1. Normalizar la palabra del diccionario (sin diacríticos)
                 const normalizedWord = stripDiacritics(word).toLowerCase();
 
-                // 2. Usamos startsWith() en el cliente
                 if (normalizedWord.startsWith(normalizedQuery)) {
                     suggestions.push(word);
                     if (suggestions.length >= MAX_SUGGESTIONS) {
@@ -308,9 +292,7 @@
             return suggestions;
         }
 
-        /** * Maneja el cambio en el input y muestra sugerencias. 
-         * ¡Esta función ahora es INSTANTÁNEA!
-         */
+        /** Maneja el cambio en el input y muestra sugerencias. */
         function handleInput() {
             const query = elements.queryInput.value;
             if (query.length < 2) {
@@ -342,7 +324,7 @@
         }
         
         /**
-         * Llama a la API de Apps Script para la búsqueda real (lenta, pero necesaria).
+         * Llama a la API de Apps Script para la búsqueda real.
          */
         async function searchWord(word) {
             if (!elements.apiUrl.value) {
