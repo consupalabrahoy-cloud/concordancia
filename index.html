@@ -47,7 +47,7 @@
             <label for="apiUrl" class="block text-sm font-medium text-yellow-800 mb-1">URL de tu API de Apps Script</label>
             <input type="text" id="apiUrl" placeholder="Pega aquí la URL de despliegue de tu App Script..."
                    class="w-full px-3 py-2 border border-yellow-300 rounded-lg text-sm focus:ring-yellow-500 focus:border-yellow-500 transition"
-                   value="[PEGA_AQUÍ_LA_URL_DE_TU_APPS_SCRIPT]"
+                   value="[https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec]"
                    onchange="saveApiUrl()">
             <p class="text-xs text-yellow-700 mt-1">Este valor se guarda en tu navegador. Recuerda volver a desplegar tu script si lo cambias.</p>
         </div>
@@ -228,7 +228,7 @@
             let storedApiUrl = elements.apiUrl.value.trim();
             
             // Si el dueño no ha cambiado el placeholder, intenta leer de localStorage por si acaso
-            if (storedApiUrl === '[https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec]') {
+            if (storedApiUrl === '[PEGA_AQUÍ_LA_URL_DE_TU_APPS_SCRIPT]') {
                 storedApiUrl = localStorage.getItem(API_BASE_URL_KEY);
                 if (storedApiUrl) {
                     elements.apiUrl.value = storedApiUrl;
