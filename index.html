@@ -43,11 +43,12 @@
         <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Buscador LexiS-G</h1>
         
         <!-- API URL Config (OCULTO para el usuario final, PRE-CONFIGURADO por el dueño) -->
+        <!-- NOTA IMPORTANTE: LA URL YA HA SIDO CORREGIDA (SE QUITARON LOS CORCHETES []) -->
         <div id="apiUrlConfig" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg hidden">
             <label for="apiUrl" class="block text-sm font-medium text-yellow-800 mb-1">URL de tu API de Apps Script</label>
-            <input type="text" id="apiUrl" placeholder="Pega la url aquí..."
+            <input type="text" id="apiUrl" placeholder="Pega aquí la URL de despliegue de tu App Script..."
                    class="w-full px-3 py-2 border border-yellow-300 rounded-lg text-sm focus:ring-yellow-500 focus:border-yellow-500 transition"
-                   value="[https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec]"
+                   value="https://script.google.com/macros/s/AKfycbzAYgewlUCnedtbPhhJf9ajgX_94pXbM8E06ZSPPejXj0SIqIYaQ1v0_DTqea_wO2LE/exec"
                    onchange="saveApiUrl()">
             <p class="text-xs text-yellow-700 mt-1">Este valor se guarda en tu navegador. Si lo necesitas cambiar, edita el código fuente.</p>
         </div>
@@ -183,7 +184,12 @@
             const wordListPromise = fetch(listUrl)
                 .then(response => response.text())
                 .then(text => {
+                    // console.log("Raw API Response Text:", text.substring(0, 200) + "..."); 
                     const jsonMatch = text.match(/callback\(([\s\S]*)\)/);
+                    if (!jsonMatch) {
+                        // console.error("JSONP match failed. Received text:", text);
+                        throw new Error("Respuesta inválida de Apps Script (JSONP no reconocido).");
+                    }
                     return jsonMatch ? JSON.parse(jsonMatch[1]) : [];
                 })
                 .then(list => {
@@ -212,19 +218,17 @@
         async function loadData() {
             let storedApiUrl = elements.apiUrl.value.trim();
             
-            // Si el dueño olvidó rellenar el placeholder, intentamos leer de localStorage (si ya lo había puesto)
-            if (storedApiUrl === '[PEGA_AQUÍ_TU_URL_DE_APPS_SCRIPT]') {
+            // Si después de todo, la URL sigue siendo el placeholder o está vacía, mostramos el campo para configurarla.
+            if (!storedApiUrl || storedApiUrl === '[PEGA_AQUÍ_TU_URL_DE_APPS_SCRIPT]') {
+                // Intenta cargar desde localStorage si el value inicial era el placeholder
                 storedApiUrl = localStorage.getItem(API_BASE_URL_KEY);
                 if (storedApiUrl) {
                     elements.apiUrl.value = storedApiUrl;
+                } else {
+                    elements.apiUrlConfig.classList.remove('hidden');
+                    elements.statusMessage.textContent = "ERROR DE CONFIGURACIÓN: El dueño debe pegar la URL de la API en el campo superior antes de usarla.";
+                    return;
                 }
-            }
-            
-            // Si después de todo, la URL sigue siendo el placeholder o está vacía, mostramos el campo para configurarla.
-            if (!elements.apiUrl.value || elements.apiUrl.value === '[PEGA_AQUÍ_TU_URL_DE_APPS_SCRIPT]') {
-                elements.apiUrlConfig.classList.remove('hidden');
-                elements.statusMessage.textContent = "ERROR DE CONFIGURACIÓN: El dueño debe pegar la URL de la API en el campo superior antes de usarla.";
-                return;
             }
             
             // 1. Intentar cargar desde la caché del navegador
@@ -241,6 +245,9 @@
                 elements.queryInput.disabled = false;
                 elements.searchButton.disabled = false;
                 elements.queryInput.focus();
+                
+                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600');
+                elements.statusMessage.classList.add('bg-green-100', 'text-green-600');
                 return;
             }
 
@@ -251,13 +258,13 @@
             try {
                 await fetchInitialData(elements.apiUrl.value.trim());
                 elements.statusMessage.textContent = "Carga inicial completada. ¡Busca ahora!";
-                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600');
+                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600', 'bg-red-100', 'text-red-600');
                 elements.statusMessage.classList.add('bg-green-100', 'text-green-600');
 
             } catch (error) {
                 console.error("Error al cargar datos iniciales:", error);
                 elements.statusMessage.textContent = "ERROR de carga. Asegúrate de que la URL de la API es correcta y has desplegado el script. Detalles en consola.";
-                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600');
+                elements.statusMessage.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
                 elements.statusMessage.classList.add('bg-red-100', 'text-red-600');
             } finally {
                 elements.queryInput.disabled = false;
@@ -367,8 +374,8 @@
         function renderResults(word, data) {
             let html = `<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Resultados para: ${word}</h2>`;
             
-            if (!data) {
-                elements.resultsContainer.innerHTML = html + `<p class="text-gray-500">Error: No se pudo obtener la respuesta de la API.</p>`;
+            if (!data || data.error) {
+                elements.resultsContainer.innerHTML = html + `<p class="p-3 bg-red-100 text-red-700 rounded-lg">Error de la API: ${data ? data.error : 'No se pudo obtener la respuesta de la API.'}</p>`;
                 return;
             }
 
